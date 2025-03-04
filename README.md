@@ -1,2 +1,2 @@
 # winSearch
-Windows indexing seraching interface
+Windows indexing search interface
