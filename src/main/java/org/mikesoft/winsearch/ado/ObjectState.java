@@ -1,4 +1,4 @@
-package org.mikesoft.winsearch.win;
+package org.mikesoft.winsearch.ado;
 
 import java.util.Arrays;
 
@@ -22,7 +22,7 @@ public enum ObjectState {
         return state;
     }
 
-    public static ObjectState get(long value) {
+    public static ObjectState valueOf(long value) {
         return Arrays.stream(values())
                 .filter(item-> item.getValue() == value)
                 .findAny()

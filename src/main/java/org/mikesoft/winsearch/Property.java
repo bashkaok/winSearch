@@ -4,6 +4,7 @@ package org.mikesoft.winsearch;
  * <a href="https://learn.microsoft.com/en-us/windows/win32/search/-search-3x-wds-propertymappings"> <br>
  * MSLearn Property mapping</a>
  */
+@Deprecated
 public enum Property {
     SystemItemFolderPathDisplay("System.ItemFolderPathDisplay"),
     SystemItemPathDisplay("System.ItemPathDisplay"),

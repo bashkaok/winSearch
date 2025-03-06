@@ -7,11 +7,11 @@ import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class WinSearchDataSourceTest {
-    private static WinSearchDataSource ds;
+class DataSourceImplTest {
+    private static DataSourceImpl ds;
     @BeforeAll
     static void setUp() {
-        ds = new WinSearchDataSource();
+        ds = new DataSourceImpl();
     }
 
     @Test

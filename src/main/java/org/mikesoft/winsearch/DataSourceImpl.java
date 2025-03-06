@@ -7,10 +7,16 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
-public class WinSearchDataSource implements DataSource {
+public class DataSourceImpl implements DataSource {
+    private final Connection connection;
+
+    public DataSourceImpl() {
+        this.connection = new ConnectionImpl();
+    }
+
     @Override
     public Connection getConnection() throws SQLException {
-        return null;
+        return connection;
     }
 
     @Override

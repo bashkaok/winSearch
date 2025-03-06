@@ -4,10 +4,10 @@ import com.sun.jna.platform.win32.COM.COMException;
 import com.sun.jna.platform.win32.COM.util.ObjectFactory;
 import com.sun.jna.platform.win32.OaIdlUtil;
 import com.sun.jna.platform.win32.Ole32;
-import org.mikesoft.winsearch.win.ADOConnection;
+import org.mikesoft.winsearch.ado.Connection;
 //import org.mikesoft.winsearch.win.CursorTypeEnum;
 //import org.mikesoft.winsearch.win.LockTypeEnum;
-import org.mikesoft.winsearch.win.ADORecordset;
+import org.mikesoft.winsearch.ado.Recordset;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -17,7 +17,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class WinIndexingSearch implements SearchEngine {
+@Deprecated
+public class WinIndexingSearch {
     private static final Logger     LOGGER = Logger.getLogger(WinIndexingSearch.class.getName());
     public static final String      ADODB_CONNECTION = "Provider=Search.CollatorDSO;Extended Properties='Application=Windows';";
     public static final String[][]  NULL_RESULT = new String[0][0];
@@ -25,9 +26,9 @@ public class WinIndexingSearch implements SearchEngine {
     private final Property[]        properties;
     private int                     searchColumn = -1;
     private int                     resultColumn = 0;
-    private final ADOConnection connection;
+    private final Connection connection;
     private final ArrayList<SearchFolder> searchFolders;
-    private ADORecordset recordset;
+    private Recordset recordset;
 
     /**
      * @param properties    properties for searching {@link Property}
@@ -48,7 +49,7 @@ public class WinIndexingSearch implements SearchEngine {
         connection = getConnection(ADODB_CONNECTION);
         if (connection != null) {
             ObjectFactory factory = new ObjectFactory();
-            recordset = factory.createObject(ADORecordset.class);
+            recordset = factory.createObject(Recordset.class);
         }
     }
 
@@ -72,18 +73,18 @@ public class WinIndexingSearch implements SearchEngine {
         this.resultColumn = resultColumn;
     }
 
-    public static ADOConnection getConnection(String connectionString) {
+    public static Connection getConnection(String connectionString) {
         Ole32.INSTANCE.CoInitializeEx(null,Ole32.COINIT_APARTMENTTHREADED);
         ObjectFactory factory = new ObjectFactory();
-        ADOConnection connection;
+        Connection connection;
         try {
-            connection = factory.createObject(ADOConnection.class);
+            connection = factory.createObject(Connection.class);
         } catch (COMException ex) {
             LOGGER.log(Level.WARNING, "Connection error", ex);
             return null;
         }
         try {
-            connection.Open(connectionString, "", "", -1);
+            connection.open(connectionString, "", "", -1);
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "Connection error", ex);
             return null;
@@ -138,7 +139,7 @@ public class WinIndexingSearch implements SearchEngine {
         return buildSQL;
     }
 
-    public static Object[][] doQuery(ADOConnection connection, ADORecordset recordset, String sqlStr) {
+    public static Object[][] doQuery(Connection connection, Recordset recordset, String sqlStr) {
         if (recordset.state() == 1) recordset.close();
         try {
 //            recordset.Open(sqlStr, connection, CursorTypeEnum.adOpenUnspecified, LockTypeEnum.adLockUnspecified, -1);
@@ -158,7 +159,6 @@ public class WinIndexingSearch implements SearchEngine {
         return result;
     }
 
-    @Override
     public List<Path> getFiles(String findStr, boolean strictMatch) {
         String sql = prepareQuery(findStr, strictMatch, properties, searchColumn, searchFolders);
         return Arrays.stream(doQuery(connection, recordset, sql ))
