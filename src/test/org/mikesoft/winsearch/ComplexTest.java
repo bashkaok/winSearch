@@ -15,7 +15,7 @@ public class ComplexTest {
         final String sql = """
                     SELECT System.ItemName, System.FileName, System.ItemNameDisplay
                     FROM SystemIndex
-                    WHERE SCOPE='file:D:/Tools/Java/winSearch/src/test/resources'
+                    WHERE SCOPE='file:D:/Tools/Java/winSearch/src/test/resources/test-data'
                     """;
 
         DataSource ds = new DataSourceImpl();

@@ -6,7 +6,7 @@
 
     <groupId>org.mikesoft</groupId>
     <artifactId>winsearch</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <name>winSearch</name>
 
     <properties>
@@ -56,6 +56,14 @@
                             </addDefaultImplementationEntries>
                         </manifest>
                     </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.11.2</version>
+                <configuration>
+<!--                    <additionalOptions>-Xdoclint:none</additionalOptions>-->
                 </configuration>
             </plugin>
         </plugins>

@@ -3,8 +3,8 @@ package org.mikesoft.winsearch.ado;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mikesoft.winsearch.ado.ObjectState.adStateClosed;
-import static org.mikesoft.winsearch.ado.ObjectState.adStateOpen;
+import static org.mikesoft.winsearch.ado.ObjectStateEnum.adStateClosed;
+import static org.mikesoft.winsearch.ado.ObjectStateEnum.adStateOpen;
 
 class COMFactoryTest {
 

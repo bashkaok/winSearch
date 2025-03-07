@@ -9,13 +9,9 @@ import com.sun.jna.platform.win32.COM.util.annotation.ComProperty;
 import com.sun.jna.platform.win32.COM.COMInvokeException;
 
 /**
- * @see <a href=https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/connection-object-ado?view=sql-server-ver15>Connection Object (ADO)</a>
- * <p>
- * ProgID: ADODB.Connection.6.0 </p>
+ * Mapped interface of ADODB.Connection.6.0 (C:\Program Files\Common Files\System\ado\msado15.dll)
  * <p> guid({00000514-0000-0010-8000-00AA006D2EA4})</p>
- * C:\Program Files\Common Files\System\ado\msado15.dll
- * <p>
- * source(ConnectionEvents)</p>
+ * @see <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/connection-object-ado?view=sql-server-ver15">Connection Object (ADO)</a>
  */
 
 @ComObject(clsId = "{00000514-0000-0010-8000-00AA006D2EA4}", progId = "{B691E011-1797-432E-907A-4D8C69339129}")
@@ -58,9 +54,9 @@ interface _Connection {
     void close();
 
     /**
-     * @see <a href=https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/execute-method-ado-connection?view=sql-server-ver15>Execute Method (ADO Connection)</a>
      * @param sql contains the SQL statement
      * @param count returns the number of records that the operation affected
+     * @see <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/execute-method-ado-connection?view=sql-server-ver15">Execute Method (ADO Connection)</a>
      */
     @ComMethod(name = "Execute")
     Recordset execute(String sql, long count);
@@ -83,7 +79,8 @@ interface _Connection {
 }
 
 /**
- * @see <a href=https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/connectmodeenum?view=sql-server-ver15>ConnectModeEnum</a>
+ * Specifies the available permissions for modifying data in a {@link Connection}, opening a <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/record-object-ado?view=sql-server-ver15">Record</a>
+ * @see <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/connectmodeenum?view=sql-server-ver15">ConnectModeEnum</a>
  */
 @SuppressWarnings("unused")
 enum ConnectModeEnum {

@@ -12,12 +12,13 @@ import com.sun.jna.platform.win32.OaIdl;
 import java.util.Arrays;
 
 /**
- * @see <a href=https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/recordset-object-ado?view=sql-server-ver15>Recordset Object (ADO)</a>
+ * @see <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/recordset-object-ado?view=sql-server-ver15">Recordset Object (ADO)</a>
  * <p>
  * guid({00000535-0000-0010-8000-00AA006D2EA4}) msado15.dll</p>
  */
 @ComObject(clsId = "{00000535-0000-0010-8000-00AA006D2EA4}", progId = "{00000300-0000-0010-8000-00AA006D2EA4}")
 public interface Recordset extends _Recordset {
+    /** Default value for unspecified values */
     int adCmdUnspecified = -1;
 }
 

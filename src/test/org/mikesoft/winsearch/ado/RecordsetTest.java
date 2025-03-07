@@ -9,28 +9,22 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mikesoft.winsearch.ado.Recordset.adCmdUnspecified;
-import static org.mikesoft.winsearch.ado.ObjectState.adStateOpen;
+import static org.mikesoft.winsearch.ado.ObjectStateEnum.adStateOpen;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class RecordsetTest {
-    final static String sql = "SELECT System.ItemName, System.FileName, System.ItemNameDisplay FROM SystemIndex WHERE SCOPE='file:D:/downloads'";
     static Connection con;
-    static Recordset rs;
-    static long openCount;
 
     @BeforeAll
     static void setUp() {
         con = COMFactory.newNativeSystemIndexConnection();
         assertNotNull(con);
-        rs = COMFactory.newRecordSet();
-        assertNotNull(rs);
     }
 
     private static Recordset getOneRecordset() {
         final String sql = """
                     SELECT System.ItemName, System.FileName, System.ItemNameDisplay
                     FROM SystemIndex
-                    WHERE SCOPE='file:D:/Tools/Java/winSearch/src/test/resources'
+                    WHERE SCOPE='file:D:/Tools/Java/winSearch/src/test/resources/test-data'
                     """;
         Recordset rs = COMFactory.newRecordSet();
         rs.open(sql, con, _Recordset.CursorTypeEnum.adOpenStatic, _Recordset.LockTypeEnum.adLockReadOnly, adCmdUnspecified);
@@ -38,49 +32,48 @@ class RecordsetTest {
     }
 
     @Test
-    @Order(1)
     void open() {
-        rs.open(sql, con, _Recordset.CursorTypeEnum.adOpenStatic, _Recordset.LockTypeEnum.adLockUnspecified, adCmdUnspecified);
+        Recordset rs = getOneRecordset();
         assertEquals(adStateOpen.getValue(), rs.state());
         assertFalse(rs.isEOF());
         OaIdl.SAFEARRAY array = rs.getRows();
-        openCount = Arrays.stream((Object[][]) OaIdlUtil.toPrimitiveArray(array, true))
+        long openCount = Arrays.stream((Object[][]) OaIdlUtil.toPrimitiveArray(array, true))
 //                .map(item-> (String)item[0])
                 .count();
-        assertTrue(openCount > 0);
         assertEquals(rs.getRecordCount(), openCount);
-        rs.moveFirst();
-        Arrays.stream((Object[][]) OaIdlUtil.toPrimitiveArray(rs.getRows(), true))
-                .forEach(item-> System.out.println((String)item[0]));
     }
 
     @Test
-    @Order(2)
     void moveNext() {
-        assertThrowsExactly(COMInvokeException.class, ()->rs.moveNext());
-        rs.moveFirst();
+        Recordset rs = getOneRecordset();
         int count = 0;
         while (!rs.isEOF()) {
             rs.moveNext();
             count++;
         }
-        assertEquals(openCount, count);
+        assertEquals(rs.getRecordCount(), count);
+        assertThrowsExactly(COMInvokeException.class, rs::moveNext);
     }
 
     @Test
-    @Order(3)
     void move() {
-        rs.moveFirst();
+        Recordset rs = getOneRecordset();
+        int count = 0;
         while(!rs.isEOF()) {
             rs.moveNext();
+            count++;
         }
-        moveNext();
-        try {
-            rs.moveLast();
-        } catch (COMInvokeException e) {
-            System.out.println(e.getScode());
-            e.printStackTrace();
+        assertEquals(1,count);
+        rs.moveFirst();
+        rs.move(-1);
+        rs.move(1);
+        count = 0;
+        while(!rs.isEOF()) {
+            rs.moveNext();
+            count++;
         }
+        assertEquals(1,count);
+
     }
 
     @Test
@@ -119,12 +112,6 @@ class RecordsetTest {
         assertFalse(rs.isEOF());
         rs.getRows();
         assertTrue(rs.isEOF());
-
-        //try read before first record
-        rs.moveFirst();
-        rs.move(-1);
-        rs.getRows(1);
-
     }
 
 

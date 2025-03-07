@@ -2,18 +2,22 @@ package org.mikesoft.winsearch;
 
 import com.sun.jna.platform.win32.COM.COMInvokeException;
 import com.sun.jna.platform.win32.OaIdl;
-import com.sun.jna.platform.win32.OaIdlUtil;
-import org.mikesoft.winsearch.ado.ObjectState;
+import org.mikesoft.winsearch.ado.ObjectStateEnum;
 import org.mikesoft.winsearch.ado.Recordset;
+import org.mikesoft.winsearch.utils.OaIdlUtil;
+import org.mikesoft.winsearch.utils.ThrowingSupplier;
+import org.mikesoft.winsearch.utils.ThrowingSupplierVoid;
 
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Map;
+import java.sql.Date;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class ResultSetImpl implements ResultSet {
     private final Recordset recordset;
@@ -86,7 +90,7 @@ public class ResultSetImpl implements ResultSet {
 
     @Override
     public String getString(int columnIndex) throws SQLException {
-        return "";
+        return getObject(columnIndex, String.class);
     }
 
     @Override
@@ -106,7 +110,7 @@ public class ResultSetImpl implements ResultSet {
 
     @Override
     public int getInt(int columnIndex) throws SQLException {
-        return 0;
+        return getObject(columnIndex, Integer.class);
     }
 
     @Override
@@ -136,16 +140,22 @@ public class ResultSetImpl implements ResultSet {
 
     @Override
     public Date getDate(int columnIndex) throws SQLException {
+        return getObject(columnIndex, Date.class);
+    }
+
+    /**
+     * Unsupported. Use {@link #getDate(int)}}
+     */
+    @Override
+    public Time getTime(int columnIndex) {
         return null;
     }
 
+    /**
+    * Unsupported Use {@link #getDate(int)}
+    */
     @Override
-    public Time getTime(int columnIndex) throws SQLException {
-        return null;
-    }
-
-    @Override
-    public Timestamp getTimestamp(int columnIndex) throws SQLException {
+    public Timestamp getTimestamp(int columnIndex) {
         return null;
     }
 
@@ -225,7 +235,7 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public Timestamp getTimestamp(String columnLabel) throws SQLException {
+    public Timestamp getTimestamp(String columnLabel) {
         return null;
     }
 
@@ -277,12 +287,33 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
+    public Statement getStatement() throws SQLException {
+        closedAssert();
+        return statement;
+    }
+
+    @Override
     public Object getObject(int columnIndex) throws SQLException {
         return currentRow.getObject(columnIndex);
     }
 
     @Override
+    public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
+        return currentRow.getObject(columnIndex, type);
+    }
+
+    @Override
     public Object getObject(String columnLabel) throws SQLException {
+        return null;
+    }
+
+    @Override
+    public Object getObject(String columnLabel, Map<String, Class<?>> map) throws SQLException {
+        return null;
+    }
+
+    @Override
+    public Object getObject(int columnIndex, Map<String, Class<?>> map) throws SQLException {
         return null;
     }
 
@@ -419,8 +450,8 @@ public class ResultSetImpl implements ResultSet {
     }
 
     /**
-    * Unsupported
-    */
+     * Unsupported
+     */
     @Override
     public boolean rowUpdated() {
         return false;
@@ -557,8 +588,7 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public void updateLong(String columnLabel, long x) throws SQLException {
-
+    public void updateLong(String columnLabel, long x) {
     }
 
     @Override
@@ -597,8 +627,7 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public void updateTimestamp(String columnLabel, Timestamp x) throws SQLException {
-
+    public void updateTimestamp(String columnLabel, Timestamp x) {
     }
 
     @Override
@@ -622,8 +651,7 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public void updateObject(String columnLabel, Object x) throws SQLException {
-
+    public void updateObject(String columnLabel, Object x) {
     }
 
     @Override
@@ -662,17 +690,6 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public Statement getStatement() throws SQLException {
-        closedAssert();
-        return statement;
-    }
-
-    @Override
-    public Object getObject(int columnIndex, Map<String, Class<?>> map) throws SQLException {
-        return null;
-    }
-
-    @Override
     public Ref getRef(int columnIndex) throws SQLException {
         return null;
     }
@@ -689,11 +706,6 @@ public class ResultSetImpl implements ResultSet {
 
     @Override
     public Array getArray(int columnIndex) throws SQLException {
-        return null;
-    }
-
-    @Override
-    public Object getObject(String columnLabel, Map<String, Class<?>> map) throws SQLException {
         return null;
     }
 
@@ -807,19 +819,9 @@ public class ResultSetImpl implements ResultSet {
         return null;
     }
 
-    @Override
-    public void updateRowId(int columnIndex, RowId x) throws SQLException {
-
-    }
-
-    @Override
-    public void updateRowId(String columnLabel, RowId x) throws SQLException {
-
-    }
-
     /**
-    * Unsupported
-    */
+     * Unsupported
+     */
     @SuppressWarnings("MagicConstant")
     @Override
     public int getHoldability() throws SQLException {
@@ -828,27 +830,23 @@ public class ResultSetImpl implements ResultSet {
 
     @Override
     public boolean isClosed() throws SQLException {
-        return comInvokeExWrap(() -> ObjectState.valueOf(recordset.state()) == ObjectState.adStateClosed);
+        return comInvokeExWrap(() -> ObjectStateEnum.valueOf(recordset.state()) == ObjectStateEnum.adStateClosed);
     }
 
     @Override
-    public void updateNString(int columnIndex, String nString) throws SQLException {
-
+    public void updateNString(int columnIndex, String nString) {
     }
 
     @Override
-    public void updateNString(String columnLabel, String nString) throws SQLException {
-
+    public void updateNString(String columnLabel, String nString) {
     }
 
     @Override
-    public void updateNClob(int columnIndex, NClob nClob) throws SQLException {
-
+    public void updateNClob(int columnIndex, NClob nClob) {
     }
 
     @Override
-    public void updateNClob(String columnLabel, NClob nClob) throws SQLException {
-
+    public void updateNClob(String columnLabel, NClob nClob) {
     }
 
     @Override
@@ -872,13 +870,11 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public void updateSQLXML(int columnIndex, SQLXML xmlObject) throws SQLException {
-
+    public void updateSQLXML(int columnIndex, SQLXML xmlObject) {
     }
 
     @Override
-    public void updateSQLXML(String columnLabel, SQLXML xmlObject) throws SQLException {
-
+    public void updateSQLXML(String columnLabel, SQLXML xmlObject) {
     }
 
     @Override
@@ -902,47 +898,49 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public void updateNCharacterStream(int columnIndex, Reader x, long length) throws SQLException {
+    public void updateNCharacterStream(int columnIndex, Reader x, long length) {
+    }
+
+    @Override
+    public void updateNCharacterStream(String columnLabel, Reader reader, long length) {
+    }
+
+    @Override
+    public void updateAsciiStream(int columnIndex, InputStream x, long length) {
+    }
+
+    @Override
+    public void updateBinaryStream(int columnIndex, InputStream x, long length) {
+    }
+
+    @Override
+    public void updateRowId(int columnIndex, RowId x) {
+    }
+
+    @Override
+    public void updateRowId(String columnLabel, RowId x) {
+    }
+
+    @Override
+    public void updateCharacterStream(int columnIndex, Reader x, long length) {
+    }
+
+    @Override
+    public void updateAsciiStream(String columnLabel, InputStream x, long length) {
+    }
+
+    @Override
+    public void updateBinaryStream(String columnLabel, InputStream x, long length) {
 
     }
 
     @Override
-    public void updateNCharacterStream(String columnLabel, Reader reader, long length) throws SQLException {
+    public void updateCharacterStream(String columnLabel, Reader reader, long length) {
 
     }
 
     @Override
-    public void updateAsciiStream(int columnIndex, InputStream x, long length) throws SQLException {
-
-    }
-
-    @Override
-    public void updateBinaryStream(int columnIndex, InputStream x, long length) throws SQLException {
-
-    }
-
-    @Override
-    public void updateCharacterStream(int columnIndex, Reader x, long length) throws SQLException {
-
-    }
-
-    @Override
-    public void updateAsciiStream(String columnLabel, InputStream x, long length) throws SQLException {
-
-    }
-
-    @Override
-    public void updateBinaryStream(String columnLabel, InputStream x, long length) throws SQLException {
-
-    }
-
-    @Override
-    public void updateCharacterStream(String columnLabel, Reader reader, long length) throws SQLException {
-
-    }
-
-    @Override
-    public void updateBlob(int columnIndex, InputStream inputStream, long length) throws SQLException {
+    public void updateBlob(int columnIndex, InputStream inputStream, long length) {
 
     }
 
@@ -987,8 +985,8 @@ public class ResultSetImpl implements ResultSet {
     }
 
     /**
-    * Unsupported
-    */
+     * Unsupported
+     */
     @Override
     public void updateBinaryStream(int columnIndex, InputStream x) {
 
@@ -1046,11 +1044,6 @@ public class ResultSetImpl implements ResultSet {
 
 
     @Override
-    public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
-        return null;
-    }
-
-    @Override
     public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
         return null;
     }
@@ -1066,6 +1059,28 @@ public class ResultSetImpl implements ResultSet {
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return Arrays.stream(recordset.getClass().getInterfaces())
                 .anyMatch(i -> i == iface);
+    }
+
+    /**
+     * Stream of ResultSet. The ResultSet rests opened after stream processing.
+     */
+    public Stream<ResultSet> stream() throws SQLException {
+        ResultSet resultSet = this;
+        resultSet.beforeFirst();
+        return StreamSupport.stream(new Spliterators.AbstractSpliterator<>(Long.MAX_VALUE, Spliterator.IMMUTABLE) {
+            @Override
+            public boolean tryAdvance(Consumer<? super ResultSet> action) {
+                try {
+                    if (!resultSet.next()) {
+                        return false;
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+                action.accept(resultSet);
+                return true;
+            }
+        }, false);
     }
 
     public static <T> T comInvokeExWrap(final ThrowingSupplier<T, COMInvokeException> supplier) throws SearchSQLException {
@@ -1097,15 +1112,27 @@ public class ResultSetImpl implements ResultSet {
 
         public Object getObject(int columnIndex) throws SQLException {
             if (row == null) readingAssert();
-            indexAssert(columnIndex);
+            assertIndex(columnIndex);
             return row[columnIndex];
         }
 
-        private void indexAssert(int columnIndex) throws SearchSQLException {
+        @SuppressWarnings("unchecked")
+        public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
+            Object obj = getObject(columnIndex);
+            if (obj.getClass() == type) return (T) obj;
+            if (type == Date.class && obj instanceof java.util.Date date) return (T) new Date(date.getTime());
+            throw new IllegalStateException("Unexpected type: " + obj.getClass() + " for column " + columnIndex);
+        }
+
+        public String getString(int columnIndex) throws SQLException {
+            if (getObject(columnIndex) instanceof String str) return str;
+            throw new IllegalStateException("Unexpected type: " + getObject(columnIndex).getClass() + " for column " + columnIndex);
+        }
+
+        private void assertIndex(int columnIndex) throws SearchSQLException {
             if (columnIndex >= row.length)
                 throw new SearchSQLException("Index " + columnIndex + " out of bounds for length of record " + row.length);
         }
-
     }
 
 }

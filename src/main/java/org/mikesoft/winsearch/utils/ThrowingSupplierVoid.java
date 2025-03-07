@@ -1,4 +1,4 @@
-package org.mikesoft.winsearch;
+package org.mikesoft.winsearch.utils;
 
 @FunctionalInterface
 public interface ThrowingSupplierVoid<E extends Exception> {

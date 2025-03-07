@@ -9,8 +9,8 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mikesoft.winsearch.ado.ConnectModeEnum.adModeUnknown;
 import static org.mikesoft.winsearch.ado._Recordset.CursorTypeEnum.adOpenStatic;
-import static org.mikesoft.winsearch.ado.ObjectState.adStateClosed;
-import static org.mikesoft.winsearch.ado.ObjectState.adStateOpen;
+import static org.mikesoft.winsearch.ado.ObjectStateEnum.adStateClosed;
+import static org.mikesoft.winsearch.ado.ObjectStateEnum.adStateOpen;
 
 class ConnectionTest {
 
@@ -41,8 +41,7 @@ class ConnectionTest {
 //                .map(item-> (String)item[0])
                 .count();
         assertTrue(openCount > 0);
-        rs.setCursorType(adOpenStatic);
-        System.out.println("getRecordCount=" + rs.getRecordCount() + " : rsCount=" + openCount);
+        assertThrowsExactly(COMInvokeException.class, ()-> rs.setCursorType(adOpenStatic));
     }
 
 }
