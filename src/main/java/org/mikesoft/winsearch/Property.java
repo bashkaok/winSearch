@@ -1,10 +1,9 @@
 package org.mikesoft.winsearch;
 
 /**
- * <a href="https://learn.microsoft.com/en-us/windows/win32/search/-search-3x-wds-propertymappings"> <br>
- * MSLearn Property mapping</a>
+ * Enum of <a href="https://learn.microsoft.com/en-us/windows/win32/properties/props">Windows Property System</a>
+ * @see <a href="https://learn.microsoft.com/en-us/windows/win32/search/-search-3x-wds-propertymappings">MSLearn Property mapping</a>
  */
-@Deprecated
 public enum Property {
     SystemItemFolderPathDisplay("System.ItemFolderPathDisplay"),
     SystemItemPathDisplay("System.ItemPathDisplay"),
@@ -36,6 +35,14 @@ public enum Property {
     SystemStartDate("System.StartDate"),
     SystemKeywords("System.Keywords");
 
-    public final String value;
-    private Property(String value) {this.value = value; }
+    public final String name;
+
+    Property(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
 }

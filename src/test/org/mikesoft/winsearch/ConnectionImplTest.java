@@ -2,6 +2,7 @@ package org.mikesoft.winsearch;
 
 import org.junit.jupiter.api.Test;
 import org.mikesoft.winsearch.ado.Connection;
+import org.mikesoft.winsearch.sql.ConnectionImpl;
 
 import java.sql.SQLException;
 

@@ -1,4 +1,4 @@
-package org.mikesoft.winsearch;
+package org.mikesoft.winsearch.sql;
 
 import java.sql.SQLException;
 

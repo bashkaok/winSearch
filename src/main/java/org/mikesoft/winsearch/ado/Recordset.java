@@ -12,9 +12,8 @@ import com.sun.jna.platform.win32.OaIdl;
 import java.util.Arrays;
 
 /**
+ * Mapped interface of ADODB.Recordset.6.0 (clsId = {00000535-0000-0010-8000-00AA006D2EA4})
  * @see <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/recordset-object-ado?view=sql-server-ver15">Recordset Object (ADO)</a>
- * <p>
- * guid({00000535-0000-0010-8000-00AA006D2EA4}) msado15.dll</p>
  */
 @ComObject(clsId = "{00000535-0000-0010-8000-00AA006D2EA4}", progId = "{00000300-0000-0010-8000-00AA006D2EA4}")
 public interface Recordset extends _Recordset {
@@ -23,10 +22,7 @@ public interface Recordset extends _Recordset {
 }
 
 /**
- *
- *
- * <p>
- * guid({00000556-0000-0010-8000-00AA006D2EA4})</p>
+ * Mapped proxy interface _Record v.6.1 (clsId = {00000556-0000-0010-8000-00AA006D2EA4})
  */
 @ComInterface(iid = "{00000556-0000-0010-8000-00AA006D2EA4}")
 interface _Recordset {
@@ -131,10 +127,7 @@ interface _Recordset {
     void open(Object source,
               Object activeConnection);
 
-    /**
-     * <p>
-     * guid({0000051B-0000-0010-8000-00AA006D2EA4})</p>
-     */
+    // guid={0000051B-0000-0010-8000-00AA006D2EA4}?
     enum CursorTypeEnum implements IComEnum {
         adOpenUnspecified(-1),
         adOpenForwardOnly(0),
@@ -152,6 +145,11 @@ interface _Recordset {
             return this.value;
         }
 
+        /**
+         * Returns the enum constant of this class with the specified
+         * @param value of cursor
+         * @return {@link CursorTypeEnum CursorTypeEnum}
+         */
         public static CursorTypeEnum valueOf(long value) {
             return Arrays.stream(values())
                     .filter(i->i.getValue() == value)
@@ -160,10 +158,7 @@ interface _Recordset {
         }
     }
 
-    /**
-     * <p>
-     * guid({0000051D-0000-0010-8000-00AA006D2EA4})</p>
-     */
+    //guid({0000051D-0000-0010-8000-00AA006D2EA4} ?
     enum LockTypeEnum implements IComEnum {
         adLockUnspecified(-1),
         adLockReadOnly(1),

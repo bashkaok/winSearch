@@ -1,4 +1,4 @@
-package org.mikesoft.winsearch;
+package org.mikesoft.winsearch.sql;
 
 import com.sun.jna.platform.win32.COM.COMInvokeException;
 import org.mikesoft.winsearch.ado.COMFactory;
@@ -6,6 +6,9 @@ import org.mikesoft.winsearch.ado.Recordset;
 
 import java.sql.*;
 
+/**
+ * Implementation of {@link Statement}
+ */
 public class StatementImpl implements Statement {
 
     private final org.mikesoft.winsearch.ado.Connection connection;

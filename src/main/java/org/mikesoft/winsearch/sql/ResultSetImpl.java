@@ -1,4 +1,4 @@
-package org.mikesoft.winsearch;
+package org.mikesoft.winsearch.sql;
 
 import com.sun.jna.platform.win32.COM.COMInvokeException;
 import com.sun.jna.platform.win32.OaIdl;
@@ -19,6 +19,9 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+/**
+ * Wrapper for {@link Recordset RecordSet(ADO)}
+ */
 public class ResultSetImpl implements ResultSet {
     private final Recordset recordset;
     private final Statement statement;

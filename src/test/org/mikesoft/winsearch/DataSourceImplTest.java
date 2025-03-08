@@ -2,6 +2,7 @@ package org.mikesoft.winsearch;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mikesoft.winsearch.sql.DataSourceImpl;
 
 import java.sql.SQLException;
 

@@ -1,4 +1,4 @@
-package org.mikesoft.winsearch;
+package org.mikesoft.winsearch.sql;
 
 import org.mikesoft.winsearch.ado.COMFactory;
 

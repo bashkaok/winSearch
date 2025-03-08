@@ -1,4 +1,4 @@
-package org.mikesoft.winsearch;
+package org.mikesoft.winsearch.sql;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
@@ -7,6 +7,9 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
+/**
+ * Implementation of {@link DataSource} for Windows Index Search
+ */
 public class DataSourceImpl implements DataSource {
     private final Connection connection;
 

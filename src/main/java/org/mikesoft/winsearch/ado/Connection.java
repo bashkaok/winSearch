@@ -22,8 +22,7 @@ public interface Connection extends _Connection,
 }
 
 /**
- * <p>
- * guid({00001550-0000-0010-8000-00AA006D2EA4})</p>
+ * Mapped proxy interface _Connection v.6.1 (clsId = {00001550-0000-0010-8000-00AA006D2EA4})
  */
 @SuppressWarnings("unused")
 @ComInterface(iid = "{00001550-0000-0010-8000-00AA006D2EA4}")
@@ -35,6 +34,8 @@ interface _Connection {
     @ComProperty(name = "Mode")
     long mode();
     /**
+     * Sets open mode
+     * @param mode {@link ConnectModeEnum}
      * @throws COMInvokeException when connection is opened
      */
     @ComProperty(name = "Mode")
@@ -54,13 +55,20 @@ interface _Connection {
     void close();
 
     /**
-     * @param sql contains the SQL statement
-     * @param count returns the number of records that the operation affected
+     * Executes specified SQL query
+     * @param sql SQL statement
+     * @param count returns the number of records that the operation affected (for update and insert queries)
+     * @return {@link Recordset}
      * @see <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/execute-method-ado-connection?view=sql-server-ver15">Execute Method (ADO Connection)</a>
      */
     @ComMethod(name = "Execute")
     Recordset execute(String sql, long count);
 
+    /**
+     * Overloaded {@link #execute(String, long)} execute}
+     * @param sql SQL statement
+     * @return @return {@link Recordset}
+     */
     @ComMethod(name = "Execute")
     Recordset execute(String sql);
 

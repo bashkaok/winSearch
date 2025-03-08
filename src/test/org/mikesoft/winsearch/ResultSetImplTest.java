@@ -2,6 +2,9 @@ package org.mikesoft.winsearch;
 
 import org.junit.jupiter.api.Test;
 import org.mikesoft.winsearch.ado.Recordset;
+import org.mikesoft.winsearch.sql.ConnectionImpl;
+import org.mikesoft.winsearch.sql.ResultSetImpl;
+import org.mikesoft.winsearch.sql.SearchSQLException;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
