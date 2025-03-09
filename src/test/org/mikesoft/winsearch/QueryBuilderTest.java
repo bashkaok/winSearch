@@ -3,16 +3,35 @@ package org.mikesoft.winsearch;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class QueryBuilderTest {
+    private static final Path test_path = Path.of("D:\\Tools\\test-test_path");
+
+    @Test
+    void build_assertions() {
+        //Empty property list
+        assertThrowsExactly(IllegalArgumentException.class, () -> QueryBuilder.build(
+                new ArrayList<String>(),
+                List.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Shallow)),
+                QueryBuilder.FullText.FreeText)
+        );
+
+        //Full-text columns not in property list
+        assertThrowsExactly(IllegalArgumentException.class, () -> QueryBuilder.build(
+                        List.of("System.ItemPathDisplay", "System.FileName"),
+                        List.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Shallow)),
+                        QueryBuilder.FullText.FreeText,
+                        "System.FileDisplayName"
+                )
+        );
+    }
 
     @Test
     void build() {
-        final Path test_path = Path.of("D:\\Tools\\test-test_path");
-
         final String shallow_freeText_Sql = """
                 SELECT System.ItemPathDisplay, System.FileName
                 FROM SystemIndex
@@ -20,8 +39,7 @@ class QueryBuilderTest {
                 """;
         assertEquals(shallow_freeText_Sql.trim(), QueryBuilder.build(
                 List.of(Property.SystemItemPathDisplay, Property.SystemFileName),
-                List.of(test_path),
-                QueryBuilder.Traversal.Shallow,
+                List.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Shallow)),
                 QueryBuilder.FullText.FreeText
         ).trim());
 
@@ -32,24 +50,42 @@ class QueryBuilderTest {
                 """;
         assertEquals(deep_contains_Sql.trim(), QueryBuilder.build(
                 List.of(Property.SystemItemPathDisplay, Property.SystemFileName),
-                List.of(test_path),
-                QueryBuilder.Traversal.Deep,
+                List.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Deep)),
                 QueryBuilder.FullText.Contains
         ).trim());
 
-        final String deep_contains_multiple_Sql = """
+    }
+
+    @Test
+    void build_multiple_folders() {
+        final String sql = """
                 SELECT System.ItemPathDisplay, System.FileName
                 FROM SystemIndex
-                WHERE (SCOPE='file:D:\\Tools\\test-test_path' OR SCOPE='file:D:\\Tools\\test-path2') AND CONTAINS(System.ItemPathDisplay,System.FileName, '%s')
+                WHERE (SCOPE='file:D:\\Tools\\test-test_path' OR DIRECTORY='file:D:\\Tools\\test-path2') AND CONTAINS(System.ItemPathDisplay,System.FileName, '%s')
                 """;
-        assertEquals(deep_contains_multiple_Sql.trim(), QueryBuilder.build(
+        assertEquals(sql.trim(), QueryBuilder.build(
                 List.of(Property.SystemItemPathDisplay, Property.SystemFileName),
-                List.of(test_path, Path.of("D:\\Tools\\test-path2")),
-                QueryBuilder.Traversal.Deep,
+                List.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Deep),
+                        QueryBuilder.Folder.of(Path.of("D:\\Tools\\test-path2"), QueryBuilder.Traversal.Shallow)),
                 QueryBuilder.FullText.Contains,
                 Property.SystemItemPathDisplay, Property.SystemFileName
         ).trim());
+    }
 
+
+    @Test
+    void build_empty_folder_list() {
+        final String sql = """
+                SELECT System.ItemPathDisplay, System.FileName
+                FROM SystemIndex
+                WHERE CONTAINS(System.ItemPathDisplay,System.FileName, '%s')
+                """;
+        assertEquals(sql.trim(), QueryBuilder.build(
+                List.of(Property.SystemItemPathDisplay, Property.SystemFileName),
+                List.of(),
+                QueryBuilder.FullText.Contains,
+                Property.SystemItemPathDisplay, Property.SystemFileName
+        ).trim());
 
     }
 }

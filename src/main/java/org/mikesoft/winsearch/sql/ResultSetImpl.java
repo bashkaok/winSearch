@@ -39,8 +39,12 @@ public class ResultSetImpl implements ResultSet {
 
     /**
      * Returns number of records in ResultSet. ResultSet still is valid
+     *
+     * @return count of records
+     * @throws SearchSQLException when ResultSet is closed
      */
     public long size() throws SQLException {
+        assertClosedResultSet();
         return comInvokeExWrap(recordset::getRecordCount);
     }
 
@@ -63,7 +67,7 @@ public class ResultSetImpl implements ResultSet {
         if (isAfterLast()) throw new SearchSQLException("Try reading after last record");
     }
 
-    private void closedAssert() throws SQLException {
+    private void assertClosedResultSet() throws SQLException {
         if (isClosed()) throw new SearchSQLException("ResultSet is closed");
     }
 
@@ -86,8 +90,11 @@ public class ResultSetImpl implements ResultSet {
         comInvokeExWrap(recordset::close);
     }
 
+    /**
+     * Unsupported
+     */
     @Override
-    public boolean wasNull() throws SQLException {
+    public boolean wasNull() {
         return false;
     }
 
@@ -97,17 +104,17 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public boolean getBoolean(int columnIndex) throws SQLException {
+    public boolean getBoolean(int columnIndex) {
         return false;
     }
 
     @Override
-    public byte getByte(int columnIndex) throws SQLException {
+    public byte getByte(int columnIndex) {
         return 0;
     }
 
     @Override
-    public short getShort(int columnIndex) throws SQLException {
+    public short getShort(int columnIndex) {
         return 0;
     }
 
@@ -117,27 +124,27 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public long getLong(int columnIndex) throws SQLException {
+    public long getLong(int columnIndex) {
         return 0;
     }
 
     @Override
-    public float getFloat(int columnIndex) throws SQLException {
+    public float getFloat(int columnIndex) {
         return 0;
     }
 
     @Override
-    public double getDouble(int columnIndex) throws SQLException {
+    public double getDouble(int columnIndex) {
         return 0;
     }
 
     @Override
-    public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
+    public BigDecimal getBigDecimal(int columnIndex, int scale) {
         return null;
     }
 
     @Override
-    public byte[] getBytes(int columnIndex) throws SQLException {
+    public byte[] getBytes(int columnIndex) {
         return new byte[0];
     }
 
@@ -155,15 +162,18 @@ public class ResultSetImpl implements ResultSet {
     }
 
     /**
-    * Unsupported Use {@link #getDate(int)}
-    */
+     * Unsupported Use {@link #getDate(int)}
+     */
     @Override
     public Timestamp getTimestamp(int columnIndex) {
         return null;
     }
 
+    /**
+    * Unsupported
+    */
     @Override
-    public InputStream getAsciiStream(int columnIndex) throws SQLException {
+    public InputStream getAsciiStream(int columnIndex) {
         return null;
     }
 
@@ -173,12 +183,12 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public InputStream getBinaryStream(int columnIndex) throws SQLException {
+    public InputStream getBinaryStream(int columnIndex) {
         return null;
     }
 
     @Override
-    public String getString(String columnLabel) throws SQLException {
+    public String getString(String columnLabel) {
         return "";
     }
 
@@ -269,8 +279,7 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public void clearWarnings() throws SQLException {
-
+    public void clearWarnings() {
     }
 
     /**
@@ -291,7 +300,7 @@ public class ResultSetImpl implements ResultSet {
 
     @Override
     public Statement getStatement() throws SQLException {
-        closedAssert();
+        assertClosedResultSet();
         return statement;
     }
 
@@ -325,8 +334,9 @@ public class ResultSetImpl implements ResultSet {
         return 0;
     }
 
+
     @Override
-    public Reader getCharacterStream(int columnIndex) throws SQLException {
+    public Reader getCharacterStream(int columnIndex) {
         return null;
     }
 
@@ -387,9 +397,11 @@ public class ResultSetImpl implements ResultSet {
         }
     }
 
+    /**
+    * Unsupported
+    */
     @Override
-    public void afterLast() throws SQLException {
-
+    public void afterLast() {
     }
 
     @Override
@@ -402,8 +414,11 @@ public class ResultSetImpl implements ResultSet {
         return false;
     }
 
+    /**
+    * Unsupported
+    */
     @Override
-    public int getRow() throws SQLException {
+    public int getRow() {
         return 0;
     }
 
@@ -471,123 +486,100 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public void updateNull(int columnIndex) throws SQLException {
+    public void updateNull(int columnIndex) {
+    }
+
+    @Override
+    public void updateBoolean(int columnIndex, boolean x) {
+    }
+
+    @Override
+    public void updateByte(int columnIndex, byte x) {
+    }
+
+    @Override
+    public void updateShort(int columnIndex, short x) {
+    }
+
+    @Override
+    public void updateInt(int columnIndex, int x) {
+    }
+
+    @Override
+    public void updateLong(int columnIndex, long x) {
+    }
+
+    @Override
+    public void updateFloat(int columnIndex, float x) {
+    }
+
+    @Override
+    public void updateDouble(int columnIndex, double x) {
+    }
+
+    @Override
+    public void updateBigDecimal(int columnIndex, BigDecimal x) {
+    }
+
+    @Override
+    public void updateString(int columnIndex, String x) {
+    }
+
+    @Override
+    public void updateBytes(int columnIndex, byte[] x) {
+    }
+
+    @Override
+    public void updateDate(int columnIndex, Date x) {
+    }
+
+    @Override
+    public void updateTime(int columnIndex, Time x) {
+    }
+
+    @Override
+    public void updateTimestamp(int columnIndex, Timestamp x) {
+    }
+
+    @Override
+    public void updateAsciiStream(int columnIndex, InputStream x, int length) {
+    }
+
+    @Override
+    public void updateBinaryStream(int columnIndex, InputStream x, int length) {
+    }
+
+    @Override
+    public void updateCharacterStream(int columnIndex, Reader x, int length) {
+    }
+
+    @Override
+    public void updateObject(int columnIndex, Object x, int scaleOrLength) {
+    }
+
+    @Override
+    public void updateObject(int columnIndex, Object x) {
+    }
+
+    @Override
+    public void updateNull(String columnLabel) {
+    }
+
+    @Override
+    public void updateBoolean(String columnLabel, boolean x) {
+    }
+
+    @Override
+    public void updateByte(String columnLabel, byte x) {
 
     }
 
     @Override
-    public void updateBoolean(int columnIndex, boolean x) throws SQLException {
-
+    public void updateShort(String columnLabel, short x) {
     }
 
     @Override
-    public void updateByte(int columnIndex, byte x) throws SQLException {
-
-    }
-
-    @Override
-    public void updateShort(int columnIndex, short x) throws SQLException {
-
-    }
-
-    @Override
-    public void updateInt(int columnIndex, int x) throws SQLException {
-
-    }
-
-    @Override
-    public void updateLong(int columnIndex, long x) throws SQLException {
-
-    }
-
-    @Override
-    public void updateFloat(int columnIndex, float x) throws SQLException {
-
-    }
-
-    @Override
-    public void updateDouble(int columnIndex, double x) throws SQLException {
-
-    }
-
-    @Override
-    public void updateBigDecimal(int columnIndex, BigDecimal x) throws SQLException {
-
-    }
-
-    @Override
-    public void updateString(int columnIndex, String x) throws SQLException {
-
-    }
-
-    @Override
-    public void updateBytes(int columnIndex, byte[] x) throws SQLException {
-
-    }
-
-    @Override
-    public void updateDate(int columnIndex, Date x) throws SQLException {
-
-    }
-
-    @Override
-    public void updateTime(int columnIndex, Time x) throws SQLException {
-
-    }
-
-    @Override
-    public void updateTimestamp(int columnIndex, Timestamp x) throws SQLException {
-
-    }
-
-    @Override
-    public void updateAsciiStream(int columnIndex, InputStream x, int length) throws SQLException {
-
-    }
-
-    @Override
-    public void updateBinaryStream(int columnIndex, InputStream x, int length) throws SQLException {
-
-    }
-
-    @Override
-    public void updateCharacterStream(int columnIndex, Reader x, int length) throws SQLException {
-
-    }
-
-    @Override
-    public void updateObject(int columnIndex, Object x, int scaleOrLength) throws SQLException {
-
-    }
-
-    @Override
-    public void updateObject(int columnIndex, Object x) throws SQLException {
-
-    }
-
-    @Override
-    public void updateNull(String columnLabel) throws SQLException {
-
-    }
-
-    @Override
-    public void updateBoolean(String columnLabel, boolean x) throws SQLException {
-
-    }
-
-    @Override
-    public void updateByte(String columnLabel, byte x) throws SQLException {
-
-    }
-
-    @Override
-    public void updateShort(String columnLabel, short x) throws SQLException {
-
-    }
-
-    @Override
-    public void updateInt(String columnLabel, int x) throws SQLException {
-
+    public void updateInt(String columnLabel, int x) {
     }
 
     @Override
@@ -595,13 +587,11 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public void updateFloat(String columnLabel, float x) throws SQLException {
-
+    public void updateFloat(String columnLabel, float x) {
     }
 
     @Override
-    public void updateDouble(String columnLabel, double x) throws SQLException {
-
+    public void updateDouble(String columnLabel, double x) {
     }
 
     @Override
@@ -620,13 +610,11 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public void updateDate(String columnLabel, Date x) throws SQLException {
-
+    public void updateDate(String columnLabel, Date x) {
     }
 
     @Override
-    public void updateTime(String columnLabel, Time x) throws SQLException {
-
+    public void updateTime(String columnLabel, Time x) {
     }
 
     @Override
@@ -634,23 +622,19 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public void updateAsciiStream(String columnLabel, InputStream x, int length) throws SQLException {
-
+    public void updateAsciiStream(String columnLabel, InputStream x, int length) {
     }
 
     @Override
-    public void updateBinaryStream(String columnLabel, InputStream x, int length) throws SQLException {
-
+    public void updateBinaryStream(String columnLabel, InputStream x, int length) {
     }
 
     @Override
-    public void updateCharacterStream(String columnLabel, Reader reader, int length) throws SQLException {
-
+    public void updateCharacterStream(String columnLabel, Reader reader, int length) {
     }
 
     @Override
-    public void updateObject(String columnLabel, Object x, int scaleOrLength) throws SQLException {
-
+    public void updateObject(String columnLabel, Object x, int scaleOrLength) {
     }
 
     @Override
@@ -659,7 +643,6 @@ public class ResultSetImpl implements ResultSet {
 
     @Override
     public void insertRow() {
-
     }
 
     @Override
@@ -687,8 +670,11 @@ public class ResultSetImpl implements ResultSet {
 
     }
 
+    /**
+     * Unsupported
+     */
     @Override
-    public void moveToCurrentRow() throws SQLException {
+    public void moveToCurrentRow() {
 
     }
 
@@ -732,8 +718,11 @@ public class ResultSetImpl implements ResultSet {
         return null;
     }
 
+    /**
+    * Unsupported
+    */
     @Override
-    public Date getDate(int columnIndex, Calendar cal) throws SQLException {
+    public Date getDate(int columnIndex, Calendar cal) {
         return null;
     }
 
@@ -773,52 +762,44 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public void updateRef(int columnIndex, Ref x) throws SQLException {
-
+    public void updateRef(int columnIndex, Ref x) {
     }
 
     @Override
-    public void updateRef(String columnLabel, Ref x) throws SQLException {
-
+    public void updateRef(String columnLabel, Ref x) {
     }
 
     @Override
-    public void updateBlob(int columnIndex, Blob x) throws SQLException {
-
+    public void updateBlob(int columnIndex, Blob x) {
     }
 
     @Override
-    public void updateBlob(String columnLabel, Blob x) throws SQLException {
-
+    public void updateBlob(String columnLabel, Blob x) {
     }
 
     @Override
-    public void updateClob(int columnIndex, Clob x) throws SQLException {
-
+    public void updateClob(int columnIndex, Clob x) {
     }
 
     @Override
-    public void updateClob(String columnLabel, Clob x) throws SQLException {
-
+    public void updateClob(String columnLabel, Clob x) {
     }
 
     @Override
-    public void updateArray(int columnIndex, Array x) throws SQLException {
-
+    public void updateArray(int columnIndex, Array x) {
     }
 
     @Override
-    public void updateArray(String columnLabel, Array x) throws SQLException {
-
+    public void updateArray(String columnLabel, Array x) {
     }
 
     @Override
-    public RowId getRowId(int columnIndex) throws SQLException {
+    public RowId getRowId(int columnIndex) {
         return null;
     }
 
     @Override
-    public RowId getRowId(String columnLabel) throws SQLException {
+    public RowId getRowId(String columnLabel) {
         return null;
     }
 
@@ -827,10 +808,13 @@ public class ResultSetImpl implements ResultSet {
      */
     @SuppressWarnings("MagicConstant")
     @Override
-    public int getHoldability() throws SQLException {
+    public int getHoldability() {
         return 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isClosed() throws SQLException {
         return comInvokeExWrap(() -> ObjectStateEnum.valueOf(recordset.state()) == ObjectStateEnum.adStateClosed);
@@ -987,22 +971,16 @@ public class ResultSetImpl implements ResultSet {
 
     }
 
-    /**
-     * Unsupported
-     */
     @Override
     public void updateBinaryStream(int columnIndex, InputStream x) {
-
     }
 
     @Override
     public void updateCharacterStream(int columnIndex, Reader x) {
-
     }
 
     @Override
     public void updateAsciiStream(String columnLabel, InputStream x) {
-
     }
 
     @Override
@@ -1125,11 +1103,6 @@ public class ResultSetImpl implements ResultSet {
             if (obj.getClass() == type) return (T) obj;
             if (type == Date.class && obj instanceof java.util.Date date) return (T) new Date(date.getTime());
             throw new IllegalStateException("Unexpected type: " + obj.getClass() + " for column " + columnIndex);
-        }
-
-        public String getString(int columnIndex) throws SQLException {
-            if (getObject(columnIndex) instanceof String str) return str;
-            throw new IllegalStateException("Unexpected type: " + getObject(columnIndex).getClass() + " for column " + columnIndex);
         }
 
         private void assertIndex(int columnIndex) throws SearchSQLException {

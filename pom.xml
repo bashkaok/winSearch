@@ -6,7 +6,7 @@
 
     <groupId>org.mikesoft</groupId>
     <artifactId>winsearch</artifactId>
-    <version>1.1</version>
+    <version>1.1.1</version>
     <name>winSearch</name>
 
     <properties>
@@ -65,6 +65,15 @@
                 <configuration>
 <!--                    <additionalOptions>-Xdoclint:none</additionalOptions>-->
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
