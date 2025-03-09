@@ -104,7 +104,9 @@ public class QueryBuilder {
     private static Optional<String> buildFolderPart(List<Folder> folders) {
         final String FOLDER_DELIMITER = " OR ";
         return Optional.of(folders.stream()
-                .map(folder -> folder.getTraversal().getPredicate() + "='" + folder.getPath().toUri().getScheme() + ":" + folder.getPath() + "'")
+                .map(folder -> folder.getTraversal().getPredicate() + "='" +
+                        folder.getPath().toUri().getScheme() + ":" +
+                        folder.getPath().toAbsolutePath() + "'")
                 .collect(Collectors.joining(FOLDER_DELIMITER)));
     }
 
