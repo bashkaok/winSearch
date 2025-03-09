@@ -1,6 +1,6 @@
 package org.mikesoft.winsearch.sql;
 
-import org.mikesoft.winsearch.ado.COMFactory;
+import org.mikesoft.winsearch.ado.ADOConnection;
 
 import java.sql.*;
 import java.sql.Connection;
@@ -12,27 +12,31 @@ import java.util.concurrent.Executor;
 import static org.mikesoft.winsearch.ado.ObjectStateEnum.adStateClosed;
 
 /**
- * Wrapper for {@link org.mikesoft.winsearch.ado.Connection Connection(ADO)}
+ * Wrapper for {@link ADOConnection}
  */
-public class ConnectionImpl implements Connection {
-    private final org.mikesoft.winsearch.ado.Connection connection;
+public class WinSearchConnection implements Connection {
+    private final ADOConnection adoConnection;
 
     /**
-     * Creates connection with default connection string {@link COMFactory#CONNECTION_STR}
+     * Creates wrapper for {@link ADOConnection}
      */
-    public ConnectionImpl() {
-        this.connection = COMFactory.newNativeSystemIndexConnection();
+    public WinSearchConnection(ADOConnection adoConnection) {
+        this.adoConnection = adoConnection;
+    }
+
+    public ADOConnection getAdoConnection() {
+        return adoConnection;
     }
 
     /**
-     * Creates empty statement {@link StatementImpl}
-     * @return {@link StatementImpl}
+     * Creates empty statement {@link WinSearchStatement}
+     * @return {@link WinSearchStatement}
      * @throws SQLException if a database access error occurs or this method is called on a closed connection
      */
     @Override
     public Statement createStatement() throws SQLException {
-        if (isClosed()) throw new SearchSQLException("Connection is closed");
-        return new StatementImpl(connection);
+        if (isClosed()) throw new WinSearchSQLException("Connection is closed");
+        return new WinSearchStatement(this);
     }
 
     /**
@@ -51,8 +55,11 @@ public class ConnectionImpl implements Connection {
         return null;
     }
 
+    /**
+    * Unsupported
+    */
     @Override
-    public String nativeSQL(String sql) throws SQLException {
+    public String nativeSQL(String sql) {
         return "";
     }
 
@@ -79,9 +86,11 @@ public class ConnectionImpl implements Connection {
     public void commit()  {
     }
 
+    /**
+    * Unsupported
+    */
     @Override
-    public void rollback() throws SQLException {
-
+    public void rollback() {
     }
 
     /**
@@ -89,7 +98,7 @@ public class ConnectionImpl implements Connection {
      */
     @Override
     public void close() throws SQLException {
-        connection.close();
+        adoConnection.close();
     }
 
     /**
@@ -97,11 +106,11 @@ public class ConnectionImpl implements Connection {
      */
     @Override
     public boolean isClosed() throws SQLException {
-        return this.connection.state() == adStateClosed.getValue();
+        return this.adoConnection.state() == adStateClosed.getValue();
     }
 
     @Override
-    public DatabaseMetaData getMetaData() throws SQLException {
+    public DatabaseMetaData getMetaData() {
         return null;
     }
 
@@ -117,7 +126,7 @@ public class ConnectionImpl implements Connection {
      * Interface implementation. Windows Index is read-only system
      */
     @Override
-    public boolean isReadOnly() throws SQLException {
+    public boolean isReadOnly() {
         return true;
     }
 
@@ -167,8 +176,11 @@ public class ConnectionImpl implements Connection {
     public void clearWarnings()  {
     }
 
+    /**
+    * Unsupported
+    */
     @Override
-    public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
+    public Statement createStatement(int resultSetType, int resultSetConcurrency) {
         return null;
     }
 
@@ -181,22 +193,22 @@ public class ConnectionImpl implements Connection {
     }
 
     @Override
-    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
+    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) {
         return null;
     }
 
     @Override
-    public Map<String, Class<?>> getTypeMap() throws SQLException {
+    public Map<String, Class<?>> getTypeMap() {
         return Map.of();
     }
 
     @Override
-    public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
+    public void setTypeMap(Map<String, Class<?>> map) {
 
     }
 
     @Override
-    public void setHoldability(int holdability) throws SQLException {
+    public void setHoldability(int holdability) {
 
     }
 
@@ -206,12 +218,12 @@ public class ConnectionImpl implements Connection {
     }
 
     @Override
-    public Savepoint setSavepoint() throws SQLException {
+    public Savepoint setSavepoint() {
         return null;
     }
 
     @Override
-    public Savepoint setSavepoint(String name) throws SQLException {
+    public Savepoint setSavepoint(String name) {
         return null;
     }
 
@@ -230,7 +242,7 @@ public class ConnectionImpl implements Connection {
     }
 
     @Override
-    public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+    public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) {
         return null;
     }
 
@@ -243,122 +255,121 @@ public class ConnectionImpl implements Connection {
     }
 
     @Override
-    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) {
         return null;
     }
 
     @Override
-    public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
+    public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) {
         return null;
     }
 
     @Override
-    public PreparedStatement prepareStatement(String sql, int[] columnIndexes) throws SQLException {
+    public PreparedStatement prepareStatement(String sql, int[] columnIndexes) {
         return null;
     }
 
     @Override
-    public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
+    public PreparedStatement prepareStatement(String sql, String[] columnNames) {
         return null;
     }
 
     @Override
-    public Clob createClob() throws SQLException {
+    public Clob createClob() {
         return null;
     }
 
     @Override
-    public Blob createBlob() throws SQLException {
+    public Blob createBlob() {
         return null;
     }
 
     @Override
-    public NClob createNClob() throws SQLException {
+    public NClob createNClob() {
         return null;
     }
 
     @Override
-    public SQLXML createSQLXML() throws SQLException {
+    public SQLXML createSQLXML() {
         return null;
     }
 
     @Override
-    public boolean isValid(int timeout) throws SQLException {
+    public boolean isValid(int timeout) {
         return false;
     }
 
     @Override
-    public void setClientInfo(String name, String value) throws SQLClientInfoException {
-
+    public void setClientInfo(String name, String value) {
     }
 
     @Override
-    public void setClientInfo(Properties properties) throws SQLClientInfoException {
-
+    public void setClientInfo(Properties properties) {
     }
 
     @Override
-    public String getClientInfo(String name) throws SQLException {
+    public String getClientInfo(String name) {
         return "";
     }
 
     @Override
-    public Properties getClientInfo() throws SQLException {
+    public Properties getClientInfo() {
         return null;
     }
 
     @Override
-    public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
+    public Array createArrayOf(String typeName, Object[] elements) {
         return null;
     }
 
     @Override
-    public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
+    public Struct createStruct(String typeName, Object[] attributes) {
         return null;
     }
 
+    /**
+    * Unsupported
+    */
     @Override
-    public void setSchema(String schema) throws SQLException {
-
+    public void setSchema(String schema) {
     }
 
     @Override
-    public String getSchema() throws SQLException {
+    public String getSchema() {
         return "";
     }
 
     @Override
-    public void abort(Executor executor) throws SQLException {
+    public void abort(Executor executor) {
 
     }
 
     @Override
-    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
-
+    public void setNetworkTimeout(Executor executor, int milliseconds) {
     }
 
     @Override
-    public int getNetworkTimeout() throws SQLException {
+    public int getNetworkTimeout() {
         return 0;
     }
 
     /**
-     * Returns proxy COM-object of {@link org.mikesoft.winsearch.ado.Connection Connection(ADO)}
-     * @param iface {@link org.mikesoft.winsearch.ado.Connection Connection(ADO)}
-     * @return proxy COM-object of {@link org.mikesoft.winsearch.ado.Connection Connection(ADO)}
-     * @param <T> {@link org.mikesoft.winsearch.ado.Connection Connection(ADO)}
+     * Returns proxy COM-object of {@link ADOConnection Connection(ADO)}
+     * @param iface {@link ADOConnection Connection(ADO)}
+     * @return proxy COM-object of {@link ADOConnection Connection(ADO)}
+     * @param <T> {@link ADOConnection Connection(ADO)}
      * @throws SQLException If no object found that implements the interface
      */
     @SuppressWarnings("unchecked")
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
-        if (isWrapperFor(iface)) return (T) this.connection;
-        throw new SearchSQLException("No object found that implements the interface " + iface);
+        if (isWrapperFor(iface)) return (T) this.adoConnection;
+        throw new WinSearchSQLException("No object found that implements the interface " + iface);
     }
 
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return Arrays.stream(connection.getClass().getInterfaces())
+        return Arrays.stream(adoConnection.getClass().getInterfaces())
                 .anyMatch(i -> i == iface);
     }
 

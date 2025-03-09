@@ -2,17 +2,17 @@ package org.mikesoft.winsearch;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mikesoft.winsearch.sql.DataSourceImpl;
+import org.mikesoft.winsearch.sql.WinSearchDataSource;
 
 import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class DataSourceImplTest {
-    private static DataSourceImpl ds;
+class WinSearchDataSourceTest {
+    private static WinSearchDataSource ds;
     @BeforeAll
     static void setUp() {
-        ds = new DataSourceImpl();
+        ds = new WinSearchDataSource();
     }
 
     @Test

@@ -1,10 +1,12 @@
 package org.mikesoft.winsearch;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mikesoft.winsearch.ado.Recordset;
-import org.mikesoft.winsearch.sql.ConnectionImpl;
-import org.mikesoft.winsearch.sql.ResultSetImpl;
-import org.mikesoft.winsearch.sql.SearchSQLException;
+import org.mikesoft.winsearch.ado.ADOConnection;
+import org.mikesoft.winsearch.ado.ADORecordset;
+import org.mikesoft.winsearch.sql.WinSearchResultSet;
+import org.mikesoft.winsearch.sql.WinSearchSQLException;
+import org.mikesoft.winsearch.sql.WinSearchDataSource;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -13,10 +15,22 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ResultSetImplTest {
-    static Connection con = new ConnectionImpl();
+class WinSearchResultSetTest {
+    static Connection con;
 
-    static ResultSetImpl getOneRecordResultSet() throws SQLException {
+    static final String System_FileName = "standby.png";
+    static final String System_FileExtension = ".png";
+    static final String System_ItemPathDisplay = "D:\\Tools\\Java\\winSearch\\src\\test\\resources\\test-data\\standby.png";
+    static final Date System_ItemDate = new Date(1741275729000L);
+    static final int System_Image_VerticalSize = 230;
+
+
+    @BeforeAll
+    static void setUp() throws SQLException {
+        con = new WinSearchDataSource().getConnection();
+    }
+
+    static WinSearchResultSet getOneRecordResultSet() throws SQLException {
         final String sqlOne = """
                     SELECT  System.FileName,
                             System.FileExtension,
@@ -34,21 +48,15 @@ class ResultSetImplTest {
          * System.ItemDate              (?DataTime) Thu Mar 06 18:42:09 MSK 2025,
          * System.Image.VerticalSize    (int) 230
          */
-        return (ResultSetImpl) con.createStatement().executeQuery(sqlOne);
+        return (WinSearchResultSet) con.createStatement().executeQuery(sqlOne);
     }
-
-    static final String System_FileName = "standby.png";
-    static final String System_FileExtension = ".png";
-    static final String System_ItemPathDisplay = "D:\\Tools\\Java\\winSearch\\src\\test\\resources\\test-data\\standby.png";
-    static final Date System_ItemDate = new Date(1741275729000L);
-    static final int System_Image_VerticalSize = 230;
 
     @Test
     void size() throws SQLException {
-        ResultSetImpl rs = getOneRecordResultSet();
+        WinSearchResultSet rs = getOneRecordResultSet();
         assertEquals(1, rs.size());
         rs.close();
-        assertThrowsExactly(SearchSQLException.class, rs::size);
+        assertThrowsExactly(WinSearchSQLException.class, rs::size);
     }
 
     @Test
@@ -56,23 +64,23 @@ class ResultSetImplTest {
         //on empty ResultSet
         final String sql = "SELECT System.ItemName FROM SystemIndex WHERE SCOPE='file:E:/Directory_not_found'";
         ResultSet rsEmpty = con.createStatement().executeQuery(sql);
-        assertEquals(0, ((ResultSetImpl)rsEmpty).size());
+        assertEquals(0, ((WinSearchResultSet)rsEmpty).size());
         assertFalse(rsEmpty.next());
 
         //on one record ResultSet
-        ResultSetImpl rs = getOneRecordResultSet();
+        WinSearchResultSet rs = getOneRecordResultSet();
         assertEquals(1,rs.size());
         assertTrue(rs.next());
 
         //on closed ResultSet
         rs.close();
-        assertThrowsExactly(SearchSQLException.class, rs::next);
+        assertThrowsExactly(WinSearchSQLException.class, rs::next);
     }
 
     @Test
     void getObject() throws SQLException {
         ResultSet rs = getOneRecordResultSet();
-        assertThrowsExactly(SearchSQLException.class, ()->rs.getObject(0));
+        assertThrowsExactly(WinSearchSQLException.class, ()->rs.getObject(0));
         //getObject(int columnIndex)
         while (rs.next()) {
             assertNotNull(rs.getObject(0));
@@ -83,14 +91,14 @@ class ResultSetImplTest {
             System.out.println(rs.getObject(2));
             System.out.println((rs.getObject(3)));
             System.out.println(rs.getObject(4));
-            assertThrowsExactly(SearchSQLException.class, ()->rs.getObject(5));
+            assertThrowsExactly(WinSearchSQLException.class, ()->rs.getObject(5));
         }
     }
 
     @Test
     void getString() throws SQLException {
         ResultSet rs = getOneRecordResultSet();
-        assertThrowsExactly(SearchSQLException.class, ()->rs.getObject(0));
+        assertThrowsExactly(WinSearchSQLException.class, ()->rs.getObject(0));
         //getString(int columnIndex)
         while (rs.next()) {
             assertNotNull(rs.getString(0));
@@ -102,7 +110,7 @@ class ResultSetImplTest {
             assertEquals(System_ItemPathDisplay, rs.getString(2));
             assertThrowsExactly(IllegalStateException.class, ()-> rs.getString(3));
             assertThrowsExactly(IllegalStateException.class, ()-> rs.getString(4));
-            assertThrowsExactly(SearchSQLException.class, ()->rs.getString(5));
+            assertThrowsExactly(WinSearchSQLException.class, ()->rs.getString(5));
         }
 
     }
@@ -110,12 +118,12 @@ class ResultSetImplTest {
     @Test
     void getDate() throws SQLException {
         ResultSet rs = getOneRecordResultSet();
-        assertThrowsExactly(SearchSQLException.class, ()->rs.getObject(0));
+        assertThrowsExactly(WinSearchSQLException.class, ()->rs.getObject(0));
         while (rs.next()) {
             assertEquals(System_ItemDate, rs.getDate(3));
             assertThrowsExactly(IllegalStateException.class, ()-> rs.getString(3));
             assertThrowsExactly(IllegalStateException.class, ()-> rs.getString(4));
-            assertThrowsExactly(SearchSQLException.class, ()->rs.getString(5));
+            assertThrowsExactly(WinSearchSQLException.class, ()->rs.getString(5));
         }
     }
 
@@ -131,15 +139,15 @@ class ResultSetImplTest {
         @Test
     void unwrap() throws SQLException {
         ResultSet rs = getOneRecordResultSet();
-        assertInstanceOf(Recordset.class, rs.unwrap(Recordset.class));
-        assertThrowsExactly(SearchSQLException.class, ()-> rs.unwrap(org.mikesoft.winsearch.ado.Connection.class));
+        assertInstanceOf(ADORecordset.class, rs.unwrap(ADORecordset.class));
+        assertThrowsExactly(WinSearchSQLException.class, ()-> rs.unwrap(ADOConnection.class));
     }
 
     @Test
     void isWrapperFor() throws SQLException {
         ResultSet rs = getOneRecordResultSet();
-        assertTrue(rs.isWrapperFor(Recordset.class));
-        assertFalse(rs.isWrapperFor(org.mikesoft.winsearch.ado.Connection.class));
+        assertTrue(rs.isWrapperFor(ADORecordset.class));
+        assertFalse(rs.isWrapperFor(ADOConnection.class));
     }
 
     @Test
@@ -154,22 +162,22 @@ class ResultSetImplTest {
         rs.next();
         assertFalse(rs.isBeforeFirst());
         rs.close();
-        assertThrowsExactly(SearchSQLException.class, rs::beforeFirst);
-        assertThrowsExactly(SearchSQLException.class, rs::isBeforeFirst);
+        assertThrowsExactly(WinSearchSQLException.class, rs::beforeFirst);
+        assertThrowsExactly(WinSearchSQLException.class, rs::isBeforeFirst);
     }
 
     @Test
     void isEmpty() throws SQLException {
-        ResultSetImpl rs = getOneRecordResultSet();
+        WinSearchResultSet rs = getOneRecordResultSet();
         assertFalse(rs.isEmpty());
         rs.close();
-        assertThrowsExactly(SearchSQLException.class, rs::isEmpty);
+        assertThrowsExactly(WinSearchSQLException.class, rs::isEmpty);
         rs.close();
     }
 
     @Test
     void stream() throws SQLException {
-        ResultSetImpl rs = getOneRecordResultSet();
+        WinSearchResultSet rs = getOneRecordResultSet();
         assertFalse(rs.isEmpty());
         assertEquals(1, rs.stream().count());
 //        assertEquals(System_FileName, rs.stream().map(r-> r.getString(0)).findAny().orElseThrow());

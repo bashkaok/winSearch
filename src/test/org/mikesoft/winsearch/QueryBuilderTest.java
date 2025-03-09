@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,14 +17,14 @@ class QueryBuilderTest {
         //Empty property list
         assertThrowsExactly(IllegalArgumentException.class, () -> QueryBuilder.build(
                 new ArrayList<String>(),
-                List.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Shallow)),
+                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Shallow)),
                 QueryBuilder.FullText.FreeText)
         );
 
         //Full-text columns not in property list
         assertThrowsExactly(IllegalArgumentException.class, () -> QueryBuilder.build(
                         List.of("System.ItemPathDisplay", "System.FileName"),
-                        List.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Shallow)),
+                        Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Shallow)),
                         QueryBuilder.FullText.FreeText,
                         "System.FileDisplayName"
                 )
@@ -39,7 +40,7 @@ class QueryBuilderTest {
                 """;
         assertEquals(shallow_freeText_Sql.trim(), QueryBuilder.build(
                 List.of(Property.SystemItemPathDisplay, Property.SystemFileName),
-                List.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Shallow)),
+                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Shallow)),
                 QueryBuilder.FullText.FreeText
         ).trim());
 
@@ -50,7 +51,7 @@ class QueryBuilderTest {
                 """;
         assertEquals(deep_contains_Sql.trim(), QueryBuilder.build(
                 List.of(Property.SystemItemPathDisplay, Property.SystemFileName),
-                List.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Deep)),
+                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Deep)),
                 QueryBuilder.FullText.Contains
         ).trim());
 
@@ -61,11 +62,11 @@ class QueryBuilderTest {
         final String sql = """
                 SELECT System.ItemPathDisplay, System.FileName
                 FROM SystemIndex
-                WHERE (SCOPE='file:D:\\Tools\\test-test_path' OR DIRECTORY='file:D:\\Tools\\test-path2') AND CONTAINS(System.ItemPathDisplay,System.FileName, '%s')
+                WHERE (DIRECTORY='file:D:\\Tools\\test-path2' OR SCOPE='file:D:\\Tools\\test-test_path') AND CONTAINS(System.ItemPathDisplay,System.FileName, '%s')
                 """;
         assertEquals(sql.trim(), QueryBuilder.build(
                 List.of(Property.SystemItemPathDisplay, Property.SystemFileName),
-                List.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Deep),
+                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Deep),
                         QueryBuilder.Folder.of(Path.of("D:\\Tools\\test-path2"), QueryBuilder.Traversal.Shallow)),
                 QueryBuilder.FullText.Contains,
                 Property.SystemItemPathDisplay, Property.SystemFileName
@@ -82,7 +83,7 @@ class QueryBuilderTest {
                 """;
         assertEquals(sql.trim(), QueryBuilder.build(
                 List.of(Property.SystemItemPathDisplay, Property.SystemFileName),
-                List.of(),
+                Set.of(),
                 QueryBuilder.FullText.Contains,
                 Property.SystemItemPathDisplay, Property.SystemFileName
         ).trim());

@@ -4,36 +4,37 @@ import com.sun.jna.platform.win32.OaIdlUtil;
 import org.junit.jupiter.api.*;
 import com.sun.jna.platform.win32.OaIdl;
 import com.sun.jna.platform.win32.COM.COMInvokeException;
+import org.mikesoft.winsearch.sql.WinSearchDataSource;
 
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mikesoft.winsearch.ado.Recordset.adCmdUnspecified;
+import static org.mikesoft.winsearch.ado.ADORecordset.adCmdUnspecified;
 import static org.mikesoft.winsearch.ado.ObjectStateEnum.adStateOpen;
 
-class RecordsetTest {
-    static Connection con;
+class ADORecordsetTest {
+    static ADOConnection con;
 
     @BeforeAll
     static void setUp() {
-        con = COMFactory.newNativeSystemIndexConnection();
+        con = WinSearchDataSource.newADOConnection();
         assertNotNull(con);
     }
 
-    private static Recordset getOneRecordset() {
+    private static ADORecordset getOneRecordset() {
         final String sql = """
                     SELECT System.ItemName, System.FileName, System.ItemNameDisplay
                     FROM SystemIndex
                     WHERE SCOPE='file:D:/Tools/Java/winSearch/src/test/resources/test-data'
                     """;
-        Recordset rs = COMFactory.newRecordSet();
+        ADORecordset rs = COMFactory.newRecordSet();
         rs.open(sql, con, _Recordset.CursorTypeEnum.adOpenStatic, _Recordset.LockTypeEnum.adLockReadOnly, adCmdUnspecified);
         return rs;
     }
 
     @Test
     void open() {
-        Recordset rs = getOneRecordset();
+        ADORecordset rs = getOneRecordset();
         assertEquals(adStateOpen.getValue(), rs.state());
         assertFalse(rs.isEOF());
         OaIdl.SAFEARRAY array = rs.getRows();
@@ -45,7 +46,7 @@ class RecordsetTest {
 
     @Test
     void moveNext() {
-        Recordset rs = getOneRecordset();
+        ADORecordset rs = getOneRecordset();
         int count = 0;
         while (!rs.isEOF()) {
             rs.moveNext();
@@ -57,7 +58,7 @@ class RecordsetTest {
 
     @Test
     void move() {
-        Recordset rs = getOneRecordset();
+        ADORecordset rs = getOneRecordset();
         int count = 0;
         while(!rs.isEOF()) {
             rs.moveNext();
@@ -79,7 +80,7 @@ class RecordsetTest {
     @Test
     void incorrectSQL() {
         final String sql = "SELECT System.ItemName FROM SystemIndex WHERE SCOPE='file:E:/downloads'";
-        Recordset rs = COMFactory.newRecordSet();
+        ADORecordset rs = COMFactory.newRecordSet();
         rs.open(sql, con);
         System.out.println(rs.isEOF());
         System.out.println(rs.isBOF());
@@ -87,7 +88,7 @@ class RecordsetTest {
     }
     @Test
     void oneRecordRecordSet() {
-        Recordset rs = getOneRecordset();
+        ADORecordset rs = getOneRecordset();
         assertEquals(_Recordset.CursorTypeEnum.adOpenStatic, _Recordset.CursorTypeEnum.valueOf(rs.cursorType()));
         System.out.println(rs.lockType());
         System.out.println(rs.getRecordCount());
@@ -108,7 +109,7 @@ class RecordsetTest {
 
     @Test
     void getRows() {
-        Recordset rs = getOneRecordset();
+        ADORecordset rs = getOneRecordset();
         assertFalse(rs.isEOF());
         rs.getRows();
         assertTrue(rs.isEOF());

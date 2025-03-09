@@ -1,8 +1,8 @@
 package org.mikesoft.winsearch;
 
 import org.junit.jupiter.api.Test;
-import org.mikesoft.winsearch.sql.DataSourceImpl;
-import org.mikesoft.winsearch.sql.ResultSetImpl;
+import org.mikesoft.winsearch.sql.WinSearchDataSource;
+import org.mikesoft.winsearch.sql.WinSearchResultSet;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
@@ -20,11 +20,11 @@ public class ComplexTest {
                     WHERE SCOPE='file:D:/Tools/Java/winSearch/src/test/resources/test-data'
                     """;
 
-        DataSource ds = new DataSourceImpl();
+        DataSource ds = new WinSearchDataSource();
         try (var con = ds.getConnection();
              var st = con.createStatement()) {
             ResultSet rs = st.executeQuery(sql);
-            assertEquals(1, ((ResultSetImpl)rs).size());
+            assertEquals(1, ((WinSearchResultSet)rs).size());
             int count = 0;
             while (rs.next()) {
                 rs.getObject(0);

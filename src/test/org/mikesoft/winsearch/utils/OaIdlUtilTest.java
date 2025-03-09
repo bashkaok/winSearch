@@ -3,17 +3,18 @@ package org.mikesoft.winsearch.utils;
 import com.sun.jna.platform.win32.OaIdl;
 import org.junit.jupiter.api.Test;
 import org.mikesoft.winsearch.ado.COMFactory;
-import org.mikesoft.winsearch.ado.Connection;
-import org.mikesoft.winsearch.ado.Recordset;
+import org.mikesoft.winsearch.ado.ADOConnection;
+import org.mikesoft.winsearch.ado.ADORecordset;
+import org.mikesoft.winsearch.sql.WinSearchDataSource;
 
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mikesoft.winsearch.ado.Recordset.adCmdUnspecified;
+import static org.mikesoft.winsearch.ado.ADORecordset.adCmdUnspecified;
 
 class OaIdlUtilTest {
 
-    private static Recordset getOneRecordset() {
+    private static ADORecordset getOneRecordset() {
         final String sql = """
                 SELECT  System.ItemName,
                         System.ItemPathDisplay,
@@ -22,16 +23,16 @@ class OaIdlUtilTest {
                 FROM SystemIndex
                 WHERE SCOPE='file:D:/Tools/Java/winSearch/src/test/resources/test-data'
                 """;
-        Connection con = COMFactory.newNativeSystemIndexConnection();
-        Recordset rs = COMFactory.newRecordSet();
-        rs.open(sql, con, Recordset.CursorTypeEnum.adOpenStatic, Recordset.LockTypeEnum.adLockReadOnly, adCmdUnspecified);
+        ADOConnection con = WinSearchDataSource.newADOConnection();
+        ADORecordset rs = COMFactory.newRecordSet();
+        rs.open(sql, con, ADORecordset.CursorTypeEnum.adOpenStatic, ADORecordset.LockTypeEnum.adLockReadOnly, adCmdUnspecified);
         return rs;
     }
 
 
     @Test
     void toPrimitiveArray() {
-        Recordset rs = getOneRecordset();
+        ADORecordset rs = getOneRecordset();
         assertEquals(1, rs.getRecordCount());
         OaIdl.SAFEARRAY ar = rs.getRows();
         Object[][] pa = (Object[][]) OaIdlUtil.toPrimitiveArray(ar, true);

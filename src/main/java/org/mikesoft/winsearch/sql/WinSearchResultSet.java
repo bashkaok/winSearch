@@ -3,7 +3,7 @@ package org.mikesoft.winsearch.sql;
 import com.sun.jna.platform.win32.COM.COMInvokeException;
 import com.sun.jna.platform.win32.OaIdl;
 import org.mikesoft.winsearch.ado.ObjectStateEnum;
-import org.mikesoft.winsearch.ado.Recordset;
+import org.mikesoft.winsearch.ado.ADORecordset;
 import org.mikesoft.winsearch.utils.OaIdlUtil;
 import org.mikesoft.winsearch.utils.ThrowingSupplier;
 import org.mikesoft.winsearch.utils.ThrowingSupplierVoid;
@@ -20,18 +20,18 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * Wrapper for {@link Recordset RecordSet(ADO)}
+ * Wrapper for {@link ADORecordset RecordSet(ADO)}
  */
-public class ResultSetImpl implements ResultSet {
-    private final Recordset recordset;
+public class WinSearchResultSet implements ResultSet {
+    private final ADORecordset recordset;
     private final Statement statement;
     private final CurrentRow currentRow = new CurrentRow();
 
-    public ResultSetImpl(Recordset recordset) {
-        this(recordset, null);
+    public WinSearchResultSet(ADORecordset adoRecordset) {
+        this(adoRecordset, null);
     }
 
-    public ResultSetImpl(Recordset recordset, Statement statement) {
+    public WinSearchResultSet(ADORecordset recordset, Statement statement) {
         this.recordset = recordset;
         this.statement = statement;
     }
@@ -41,7 +41,7 @@ public class ResultSetImpl implements ResultSet {
      * Returns number of records in ResultSet. ResultSet still is valid
      *
      * @return count of records
-     * @throws SearchSQLException when ResultSet is closed
+     * @throws WinSearchSQLException when ResultSet is closed
      */
     public long size() throws SQLException {
         assertClosedResultSet();
@@ -63,12 +63,12 @@ public class ResultSetImpl implements ResultSet {
     }
 
     private void readingAssert() throws SQLException {
-        if (isBeforeFirst()) throw new SearchSQLException("Try reading before first record");
-        if (isAfterLast()) throw new SearchSQLException("Try reading after last record");
+        if (isBeforeFirst()) throw new WinSearchSQLException("Try reading before first record");
+        if (isAfterLast()) throw new WinSearchSQLException("Try reading after last record");
     }
 
     private void assertClosedResultSet() throws SQLException {
-        if (isClosed()) throw new SearchSQLException("ResultSet is closed");
+        if (isClosed()) throw new WinSearchSQLException("ResultSet is closed");
     }
 
     @Override
@@ -80,7 +80,7 @@ public class ResultSetImpl implements ResultSet {
             setCurrentRecord();
             return true;
         } catch (COMInvokeException e) {
-            throw new SearchSQLException(e);
+            throw new WinSearchSQLException(e);
         }
     }
 
@@ -178,7 +178,7 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public InputStream getUnicodeStream(int columnIndex) throws SQLException {
+    public InputStream getUnicodeStream(int columnIndex) {
         return null;
     }
 
@@ -193,17 +193,17 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public boolean getBoolean(String columnLabel) throws SQLException {
+    public boolean getBoolean(String columnLabel) {
         return false;
     }
 
     @Override
-    public byte getByte(String columnLabel) throws SQLException {
+    public byte getByte(String columnLabel) {
         return 0;
     }
 
     @Override
-    public short getShort(String columnLabel) throws SQLException {
+    public short getShort(String columnLabel) {
         return 0;
     }
 
@@ -213,37 +213,37 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public long getLong(String columnLabel) throws SQLException {
+    public long getLong(String columnLabel) {
         return 0;
     }
 
     @Override
-    public float getFloat(String columnLabel) throws SQLException {
+    public float getFloat(String columnLabel) {
         return 0;
     }
 
     @Override
-    public double getDouble(String columnLabel) throws SQLException {
+    public double getDouble(String columnLabel) {
         return 0;
     }
 
     @Override
-    public BigDecimal getBigDecimal(String columnLabel, int scale) throws SQLException {
+    public BigDecimal getBigDecimal(String columnLabel, int scale) {
         return null;
     }
 
     @Override
-    public byte[] getBytes(String columnLabel) throws SQLException {
+    public byte[] getBytes(String columnLabel) {
         return new byte[0];
     }
 
     @Override
-    public Date getDate(String columnLabel) throws SQLException {
+    public Date getDate(String columnLabel) {
         return null;
     }
 
     @Override
-    public Time getTime(String columnLabel) throws SQLException {
+    public Time getTime(String columnLabel) {
         return null;
     }
 
@@ -253,7 +253,7 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public InputStream getAsciiStream(String columnLabel) throws SQLException {
+    public InputStream getAsciiStream(String columnLabel) {
         return null;
     }
 
@@ -261,7 +261,7 @@ public class ResultSetImpl implements ResultSet {
      * Unsupported
      */
     @Override
-    public InputStream getUnicodeStream(String columnLabel) throws SQLException {
+    public InputStream getUnicodeStream(String columnLabel) {
         return null;
     }
 
@@ -269,7 +269,7 @@ public class ResultSetImpl implements ResultSet {
      * Unsupported
      */
     @Override
-    public InputStream getBinaryStream(String columnLabel) throws SQLException {
+    public InputStream getBinaryStream(String columnLabel) {
         return null;
     }
 
@@ -330,7 +330,7 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public int findColumn(String columnLabel) throws SQLException {
+    public int findColumn(String columnLabel) {
         return 0;
     }
 
@@ -341,17 +341,17 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public Reader getCharacterStream(String columnLabel) throws SQLException {
+    public Reader getCharacterStream(String columnLabel) {
         return null;
     }
 
     @Override
-    public BigDecimal getBigDecimal(int columnIndex) throws SQLException {
+    public BigDecimal getBigDecimal(int columnIndex) {
         return null;
     }
 
     @Override
-    public BigDecimal getBigDecimal(String columnLabel) throws SQLException {
+    public BigDecimal getBigDecimal(String columnLabel) {
         return null;
     }
 
@@ -360,7 +360,7 @@ public class ResultSetImpl implements ResultSet {
         try {
             return recordset.isBOF();
         } catch (COMInvokeException e) {
-            throw new SearchSQLException(e);
+            throw new WinSearchSQLException(e);
         }
     }
 
@@ -393,7 +393,7 @@ public class ResultSetImpl implements ResultSet {
             recordset.move(-1);
             currentRow.setRow(null);
         } catch (COMInvokeException e) {
-            throw new SearchSQLException(e);
+            throw new WinSearchSQLException(e);
         }
     }
 
@@ -679,42 +679,42 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public Ref getRef(int columnIndex) throws SQLException {
+    public Ref getRef(int columnIndex) {
         return null;
     }
 
     @Override
-    public Blob getBlob(int columnIndex) throws SQLException {
+    public Blob getBlob(int columnIndex) {
         return null;
     }
 
     @Override
-    public Clob getClob(int columnIndex) throws SQLException {
+    public Clob getClob(int columnIndex) {
         return null;
     }
 
     @Override
-    public Array getArray(int columnIndex) throws SQLException {
+    public Array getArray(int columnIndex) {
         return null;
     }
 
     @Override
-    public Ref getRef(String columnLabel) throws SQLException {
+    public Ref getRef(String columnLabel) {
         return null;
     }
 
     @Override
-    public Blob getBlob(String columnLabel) throws SQLException {
+    public Blob getBlob(String columnLabel) {
         return null;
     }
 
     @Override
-    public Clob getClob(String columnLabel) throws SQLException {
+    public Clob getClob(String columnLabel) {
         return null;
     }
 
     @Override
-    public Array getArray(String columnLabel) throws SQLException {
+    public Array getArray(String columnLabel) {
         return null;
     }
 
@@ -727,27 +727,27 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public Date getDate(String columnLabel, Calendar cal) throws SQLException {
+    public Date getDate(String columnLabel, Calendar cal) {
         return null;
     }
 
     @Override
-    public Time getTime(int columnIndex, Calendar cal) throws SQLException {
+    public Time getTime(int columnIndex, Calendar cal) {
         return null;
     }
 
     @Override
-    public Time getTime(String columnLabel, Calendar cal) throws SQLException {
+    public Time getTime(String columnLabel, Calendar cal) {
         return null;
     }
 
     @Override
-    public Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
+    public Timestamp getTimestamp(int columnIndex, Calendar cal) {
         return null;
     }
 
     @Override
-    public Timestamp getTimestamp(String columnLabel, Calendar cal) throws SQLException {
+    public Timestamp getTimestamp(String columnLabel, Calendar cal) {
         return null;
     }
 
@@ -837,22 +837,22 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public NClob getNClob(int columnIndex) throws SQLException {
+    public NClob getNClob(int columnIndex) {
         return null;
     }
 
     @Override
-    public NClob getNClob(String columnLabel) throws SQLException {
+    public NClob getNClob(String columnLabel) {
         return null;
     }
 
     @Override
-    public SQLXML getSQLXML(int columnIndex) throws SQLException {
+    public SQLXML getSQLXML(int columnIndex) {
         return null;
     }
 
     @Override
-    public SQLXML getSQLXML(String columnLabel) throws SQLException {
+    public SQLXML getSQLXML(String columnLabel) {
         return null;
     }
 
@@ -865,22 +865,22 @@ public class ResultSetImpl implements ResultSet {
     }
 
     @Override
-    public String getNString(int columnIndex) throws SQLException {
+    public String getNString(int columnIndex) {
         return "";
     }
 
     @Override
-    public String getNString(String columnLabel) throws SQLException {
+    public String getNString(String columnLabel) {
         return "";
     }
 
     @Override
-    public Reader getNCharacterStream(int columnIndex) throws SQLException {
+    public Reader getNCharacterStream(int columnIndex) {
         return null;
     }
 
     @Override
-    public Reader getNCharacterStream(String columnLabel) throws SQLException {
+    public Reader getNCharacterStream(String columnLabel) {
         return null;
     }
 
@@ -1033,7 +1033,7 @@ public class ResultSetImpl implements ResultSet {
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
         if (isWrapperFor(iface)) return (T) recordset;
-        throw new SearchSQLException("No object found that implements the interface " + iface);
+        throw new WinSearchSQLException("No object found that implements the interface " + iface);
     }
 
     @Override
@@ -1064,19 +1064,19 @@ public class ResultSetImpl implements ResultSet {
         }, false);
     }
 
-    public static <T> T comInvokeExWrap(final ThrowingSupplier<T, COMInvokeException> supplier) throws SearchSQLException {
+    public static <T> T comInvokeExWrap(final ThrowingSupplier<T, COMInvokeException> supplier) throws WinSearchSQLException {
         try {
             return supplier.get();
         } catch (COMInvokeException e) {
-            throw new SearchSQLException(e);
+            throw new WinSearchSQLException(e);
         }
     }
 
-    public static void comInvokeExWrap(final ThrowingSupplierVoid<COMInvokeException> supplier) throws SearchSQLException {
+    public static void comInvokeExWrap(final ThrowingSupplierVoid<COMInvokeException> supplier) throws WinSearchSQLException {
         try {
             supplier.get();
         } catch (COMInvokeException e) {
-            throw new SearchSQLException(e);
+            throw new WinSearchSQLException(e);
         }
     }
 
@@ -1105,9 +1105,9 @@ public class ResultSetImpl implements ResultSet {
             throw new IllegalStateException("Unexpected type: " + obj.getClass() + " for column " + columnIndex);
         }
 
-        private void assertIndex(int columnIndex) throws SearchSQLException {
+        private void assertIndex(int columnIndex) throws WinSearchSQLException {
             if (columnIndex >= row.length)
-                throw new SearchSQLException("Index " + columnIndex + " out of bounds for length of record " + row.length);
+                throw new WinSearchSQLException("Index " + columnIndex + " out of bounds for length of record " + row.length);
         }
     }
 

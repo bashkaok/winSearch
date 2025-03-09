@@ -6,32 +6,21 @@ import com.sun.jna.platform.win32.Ole32;
 
 
 public class COMFactory {
-    public static final String CONNECTION_STR = "Provider=Search.CollatorDSO;Extended Properties='Application=Windows';";
-
-    public static Connection newNativeConnection() {
+    public static ADOConnection newNativeConnection() {
         Ole32.INSTANCE.CoInitializeEx(null, Ole32.COINIT_APARTMENTTHREADED);
         ObjectFactory factory = new ObjectFactory();
         try {
-            return factory.createObject(Connection.class);
+            return factory.createObject(ADOConnection.class);
         } catch (COMException ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    /**
-     * Creates and opens native COM ADO connection with Search.CollatorDSO provider
-     */
-    public static Connection newNativeSystemIndexConnection() {
-        Connection connection = newNativeConnection();
-        connection.open(CONNECTION_STR, "", "", -1);
-        return connection;
-    }
-
-    public static Recordset newRecordSet() {
+    public static ADORecordset newRecordSet() {
         Ole32.INSTANCE.CoInitializeEx(null, Ole32.COINIT_APARTMENTTHREADED);
         ObjectFactory factory = new ObjectFactory();
         try {
-            return factory.createObject(Recordset.class);
+            return factory.createObject(ADORecordset.class);
         } catch (COMException ex) {
             throw new RuntimeException(ex);
         }

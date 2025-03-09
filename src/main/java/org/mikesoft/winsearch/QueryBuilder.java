@@ -31,13 +31,13 @@ public class QueryBuilder {
      * For further use: sql.formatted("matching conditions");<br>
      *
      * @param properties        for select clause column
-     * @param folders           where will be done the searching List of {@link Folder Folder}
+     * @param folders           where will be done the searching set of {@link Folder Folder}
      * @param fullTextPredicate full-text or one column searching {@link FullText FullText}
      * @param fullText          Optional. If the array is specified, the searching will be complete only in specified columns
      * @return SQL formatted String: "SELECT ... FROM SystemIndex WHERE SCOPE|DIRECTORY=(...) AND FREETEXT|CONTAINS(..., %s)"
      */
     public static String build(List<String> properties,
-                               List<Folder> folders,
+                               Set<Folder> folders,
                                FullText fullTextPredicate,
                                String... fullText) {
 
@@ -57,7 +57,7 @@ public class QueryBuilder {
     }
 
     /**
-     * Overloaded method {@link #build(List, List, FullText, String...)}
+     * Overloaded method {@link #build(List, Set, FullText, String...)}
      *
      * @param properties        List of {@link Property}
      * @param folders           where will be done the searching List of {@link Folder Folder}
@@ -66,7 +66,7 @@ public class QueryBuilder {
      * @return SQL formatted string
      */
     public static String build(List<Property> properties,
-                               List<Folder> folders,
+                               Set<Folder> folders,
                                FullText fullTextPredicate,
                                Property... fullText) {
 
@@ -76,15 +76,13 @@ public class QueryBuilder {
                         .map(Property::getName)
                         .toArray(String[]::new)
         );
-
-
     }
 
     private static String buildSelectClause(List<String> properties) {
         return "SELECT " + String.join(DELIMITER, properties);
     }
 
-    private static String buildWhereClause(List<Folder> folders, FullText fullTextPredicate, List<String> fullText) {
+    private static String buildWhereClause(Set<Folder> folders, FullText fullTextPredicate, List<String> fullText) {
         final String WHERE_DELIMITER = " AND ";
         List<String> clause = new ArrayList<>();
         buildFolderPart(folders)
@@ -101,9 +99,10 @@ public class QueryBuilder {
      * @param folders list of search paths
      * @return string with part of WHERE clause: SCOPE|DIRECTORY='&lt;protocol&gt;:&lt;path&gt;'
      */
-    private static Optional<String> buildFolderPart(List<Folder> folders) {
+    private static Optional<String> buildFolderPart(Set<Folder> folders) {
         final String FOLDER_DELIMITER = " OR ";
         return Optional.of(folders.stream()
+                .sorted(Comparator.comparing(Folder::getPath))
                 .map(folder -> folder.getTraversal().getPredicate() + "='" +
                         folder.getPath().toUri().getScheme() + ":" +
                         folder.getPath().toAbsolutePath() + "'")
@@ -193,6 +192,20 @@ public class QueryBuilder {
 
         public static Folder of(Path path, QueryBuilder.Traversal traversal) {
             return new Folder(path, traversal);
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) return true;
+            if (object == null || getClass() != object.getClass()) return false;
+
+            Folder folder = (Folder) object;
+            return getPath().equals(folder.getPath());
+        }
+
+        @Override
+        public int hashCode() {
+            return getPath().hashCode();
         }
 
         @Override

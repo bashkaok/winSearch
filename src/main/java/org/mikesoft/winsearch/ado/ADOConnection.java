@@ -15,7 +15,7 @@ import com.sun.jna.platform.win32.COM.COMInvokeException;
  */
 
 @ComObject(clsId = "{00000514-0000-0010-8000-00AA006D2EA4}", progId = "{B691E011-1797-432E-907A-4D8C69339129}")
-public interface Connection extends _Connection,
+public interface ADOConnection extends _Connection,
         IConnectionPoint,
         IUnknown {
 
@@ -58,19 +58,19 @@ interface _Connection {
      * Executes specified SQL query
      * @param sql SQL statement
      * @param count returns the number of records that the operation affected (for update and insert queries)
-     * @return {@link Recordset}
+     * @return {@link ADORecordset}
      * @see <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/execute-method-ado-connection?view=sql-server-ver15">Execute Method (ADO Connection)</a>
      */
     @ComMethod(name = "Execute")
-    Recordset execute(String sql, long count);
+    ADORecordset execute(String sql, long count);
 
     /**
      * Overloaded {@link #execute(String, long)} execute}
      * @param sql SQL statement
-     * @return @return {@link Recordset}
+     * @return @return {@link ADORecordset}
      */
     @ComMethod(name = "Execute")
-    Recordset execute(String sql);
+    ADORecordset execute(String sql);
 
     /**
      * <p>
@@ -87,7 +87,7 @@ interface _Connection {
 }
 
 /**
- * Specifies the available permissions for modifying data in a {@link Connection}, opening a <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/record-object-ado?view=sql-server-ver15">Record</a>
+ * Specifies the available permissions for modifying data in a {@link ADOConnection}, opening a <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/record-object-ado?view=sql-server-ver15">Record</a>
  * @see <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/connectmodeenum?view=sql-server-ver15">ConnectModeEnum</a>
  */
 @SuppressWarnings("unused")
