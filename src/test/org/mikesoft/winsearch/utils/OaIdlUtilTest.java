@@ -21,7 +21,7 @@ class OaIdlUtilTest {
                         System.Size,
                         System.FileAttributes
                 FROM SystemIndex
-                WHERE SCOPE='file:D:/Tools/Java/winSearch/src/test/resources/test-data'
+                WHERE DIRECTORY='file:D:/Tools/Java/winSearch/src/test/resources/test-data' AND CONTAINS(*,'standby.png')
                 """;
         ADOConnection con = WinSearchDataSource.newADOConnection();
         ADORecordset rs = COMFactory.newRecordSet();

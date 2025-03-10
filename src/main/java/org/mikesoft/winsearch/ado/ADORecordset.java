@@ -13,11 +13,14 @@ import java.util.Arrays;
 
 /**
  * Mapped interface of ADODB.Recordset.6.0 (clsId = {00000535-0000-0010-8000-00AA006D2EA4})
+ *
  * @see <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/recordset-object-ado?view=sql-server-ver15">Recordset Object (ADO)</a>
  */
 @ComObject(clsId = "{00000535-0000-0010-8000-00AA006D2EA4}", progId = "{00000300-0000-0010-8000-00AA006D2EA4}")
 public interface ADORecordset extends _Recordset {
-    /** Default value for unspecified values */
+    /**
+     * Default value for unspecified values
+     */
     int adCmdUnspecified = -1;
 }
 
@@ -26,6 +29,26 @@ public interface ADORecordset extends _Recordset {
  */
 @ComInterface(iid = "{00000556-0000-0010-8000-00AA006D2EA4}")
 interface _Recordset {
+
+    /**
+     * @return long record position or {@link PositionEnum PositionEnum} constant
+     */
+    @ComProperty(name = "AbsolutePosition")
+    long absolutePosition();
+
+    /**
+     * Property to control how many records to retrieve at one time into local memory from the provider. Default is 1
+     * @return size of cache
+     */
+    @ComProperty(name = "CacheSize")
+    long cacheSize();
+
+    /**
+     * Sets {@link #cacheSize()}
+     * @param size Long value that must be greater than 0. Default is 1
+     */
+    @ComProperty(name = "CacheSize")
+    void setCacheSize(long size);
 
     @ComProperty(name = "CursorType")
     long cursorType();
@@ -38,6 +61,7 @@ interface _Recordset {
 
     /**
      * How many records are in a Recordset object.
+     *
      * @return -1 when ADO cannot determine the number of records or if the provider or cursor type does not support RecordCount.
      * @throws COMInvokeException reading the RecordCount property on a closed Recordset
      */
@@ -48,10 +72,10 @@ interface _Recordset {
      * <p>
      * memberId(1006)</p>
      */
-    @ComProperty (name = "State")
+    @ComProperty(name = "State")
     long state();
 
-    @ComProperty (name = "Source")
+    @ComProperty(name = "Source")
     String getSource();
 
     /**
@@ -68,7 +92,7 @@ interface _Recordset {
 
     /**
      * After you call GetRows, the next unread record becomes the current record, or the EOF property is set to True if there are no more records.
-     *  <p>memberId(1016)</p>
+     * <p>memberId(1016)</p>
      */
     @ComMethod(name = "GetRows")
     OaIdl.SAFEARRAY getRows(int Rows,
@@ -88,7 +112,6 @@ interface _Recordset {
     @ComMethod(name = "GetRows")
     OaIdl.SAFEARRAY getRows();
 
-
     /**
      * <p>
      * memberId(1014)</p>
@@ -107,10 +130,14 @@ interface _Recordset {
 
     /**
      * Moves the current record position one record forward
+     *
      * @throws COMInvokeException An attempt to move forward when the isEOF is true
      */
     @ComMethod(name = "MoveNext")
     void moveNext();
+
+    @ComMethod(name = "MovePrevious")
+    void movePrevious();
 
     /**
      * <p>
@@ -133,11 +160,13 @@ interface _Recordset {
         adOpenForwardOnly(0),
         adOpenKeySet(1),
         adOpenDynamic(2),
-        adOpenStatic(3),;
+        adOpenStatic(3),
+        ;
 
         CursorTypeEnum(long value) {
             this.value = value;
         }
+
         private final long value;
 
         @Override
@@ -147,12 +176,13 @@ interface _Recordset {
 
         /**
          * Returns the enum constant of this class with the specified
+         *
          * @param value of cursor
          * @return {@link CursorTypeEnum CursorTypeEnum}
          */
         public static CursorTypeEnum valueOf(long value) {
             return Arrays.stream(values())
-                    .filter(i->i.getValue() == value)
+                    .filter(i -> i.getValue() == value)
                     .findAny()
                     .orElse(null);
         }
@@ -164,16 +194,48 @@ interface _Recordset {
         adLockReadOnly(1),
         adLockPessimistic(2),
         adLockOptimistic(3),
-        adLockBatchOptimistic(4),;
+        adLockBatchOptimistic(4),
+        ;
 
         LockTypeEnum(long value) {
             this.value = value;
         }
+
         private final long value;
 
         public long getValue() {
             return this.value;
         }
     }
+
+    /**
+     * <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/positionenum?view=sql-server-ver15">PositionEnum</a>
+     */
+    enum PositionEnum implements IComEnum {
+        /**
+         * Indicates that the current record pointer is at BOF (that is, the BOF property is True)
+         */
+        adPosBOF(-2),
+        /**
+         * Indicates that the current record pointer is at EOF (that is, the EOF property is True)
+         */
+        adPosEOF(-3),
+        /**
+         * Indicates that the Recordset is empty, the current position is unknown, or the provider does not support the AbsolutePage or AbsolutePosition property
+         */
+        adPosUnknown(-1);
+
+        PositionEnum(long value) {
+            this.value = value;
+        }
+
+        private final long value;
+
+        public long getValue() {
+            return this.value;
+        }
+    }
+
+
 }
 

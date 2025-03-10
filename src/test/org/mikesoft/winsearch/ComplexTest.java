@@ -17,7 +17,7 @@ public class ComplexTest {
         final String sql = """
                     SELECT System.ItemName, System.FileName, System.ItemNameDisplay
                     FROM SystemIndex
-                    WHERE SCOPE='file:D:/Tools/Java/winSearch/src/test/resources/test-data'
+                    WHERE DIRECTORY='file:D:/Tools/Java/winSearch/src/test/resources/test-data' AND CONTAINS(*,'standby.png')
                     """;
 
         DataSource ds = new WinSearchDataSource();

@@ -25,6 +25,17 @@ class ADORecordsetTest {
         final String sql = """
                     SELECT System.ItemName, System.FileName, System.ItemNameDisplay
                     FROM SystemIndex
+                    WHERE DIRECTORY='file:D:/Tools/Java/winSearch/src/test/resources/test-data' AND CONTAINS(*,'standby.png')
+                    """;
+        ADORecordset rs = COMFactory.newRecordSet();
+        rs.open(sql, con, _Recordset.CursorTypeEnum.adOpenStatic, _Recordset.LockTypeEnum.adLockReadOnly, adCmdUnspecified);
+        return rs;
+    }
+
+    private static ADORecordset getAnyRecordset() {
+        final String sql = """
+                    SELECT System.ItemName, System.FileName, System.ItemNameDisplay
+                    FROM SystemIndex
                     WHERE SCOPE='file:D:/Tools/Java/winSearch/src/test/resources/test-data'
                     """;
         ADORecordset rs = COMFactory.newRecordSet();
@@ -42,6 +53,20 @@ class ADORecordsetTest {
 //                .map(item-> (String)item[0])
                 .count();
         assertEquals(rs.getRecordCount(), openCount);
+    }
+
+    @Test
+    void getRecordCount() {
+        ADORecordset rs = getOneRecordset();
+        assertEquals(1,rs.absolutePosition());
+        assertEquals(1, rs.getRecordCount());
+        assertEquals(1,rs.absolutePosition());
+
+        rs = getAnyRecordset();
+        assertEquals(1,rs.absolutePosition());
+        assertTrue(rs.getRecordCount()>1);
+        assertEquals(1,rs.absolutePosition());
+
     }
 
     @Test
@@ -76,6 +101,31 @@ class ADORecordsetTest {
         assertEquals(1,count);
 
     }
+
+    @Test
+    void moveFirst() {
+        ADORecordset rs = getOneRecordset();
+//        System.out.println("BOF=" + rs.isBOF() + " : EOF=" + rs.isEOF() + " : absolutePosition=" + rs.absolutePosition());
+        rs.moveNext();
+        assertEquals(_Recordset.PositionEnum.adPosEOF.getValue(), rs.absolutePosition());
+        rs.moveFirst();
+        assertEquals(1, rs.absolutePosition());
+    }
+
+    @Test
+    void movePrevious() {
+        ADORecordset rs = getAnyRecordset();
+        assertTrue(!rs.isBOF() && !rs.isEOF());
+        System.out.println("BOF=" + rs.isBOF() + " : EOF=" + rs.isEOF() + " : absolutePosition=" + rs.absolutePosition());
+        rs.movePrevious();
+        System.out.println("BOF=" + rs.isBOF() + " : EOF=" + rs.isEOF() + " : absolutePosition=" + rs.absolutePosition());
+        assertTrue(rs.isBOF());
+        rs.moveNext();
+        rs.moveNext();
+        rs.moveNext();
+        System.out.println("BOF=" + rs.isBOF() + " : EOF=" + rs.isEOF() + " : absolutePosition=" + rs.absolutePosition());
+    }
+
 
     @Test
     void incorrectSQL() {

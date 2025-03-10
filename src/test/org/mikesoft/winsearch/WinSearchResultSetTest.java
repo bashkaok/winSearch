@@ -38,7 +38,7 @@ class WinSearchResultSetTest {
                             System.ItemDate,
                             System.Image.VerticalSize
                     FROM SystemIndex
-                    WHERE SCOPE='file:D:/Tools/Java/winSearch/src/test/resources/test-data'
+                    WHERE DIRECTORY='file:D:/Tools/Java/winSearch/src/test/resources/test-data' AND CONTAINS(*,'standby.png')
                     """;
 
         /* Query results
@@ -50,6 +50,20 @@ class WinSearchResultSetTest {
          */
         return (WinSearchResultSet) con.createStatement().executeQuery(sqlOne);
     }
+
+    static WinSearchResultSet getAnyRecordsResultSet() throws SQLException {
+        final String sqlOne = """
+                    SELECT  System.FileName,
+                            System.FileExtension,
+                            System.ItemPathDisplay,
+                            System.ItemDate,
+                            System.Image.VerticalSize
+                    FROM SystemIndex
+                    WHERE SCOPE='file:D:/Tools/Java/winSearch/src/test/resources/test-data'
+                    """;
+        return (WinSearchResultSet) con.createStatement().executeQuery(sqlOne);
+    }
+
 
     @Test
     void size() throws SQLException {
@@ -75,6 +89,30 @@ class WinSearchResultSetTest {
         //on closed ResultSet
         rs.close();
         assertThrowsExactly(WinSearchSQLException.class, rs::next);
+    }
+
+    @Test
+    void last() throws SQLException {
+        //The problem with next(num) - only one record step
+//        WinSearchResultSet rs = getAnyRecordsResultSet();
+//        assertTrue(rs.isBeforeFirst());
+//        rs.unwrap(ADORecordset.class).setCacheSize(10);
+//        while(rs.next()) {
+//            System.out.println(rs.getString(0));
+//            System.out.println(rs.getRow());
+//        }
+//        assertTrue(rs.size()>1);
+//        rs.beforeFirst();
+//        assertTrue(rs.isBeforeFirst());
+//        System.out.println(rs.unwrap(ADORecordset.class).cacheSize());
+//
+//        rs.unwrap(ADORecordset.class).moveFirst();
+//        rs.unwrap(ADORecordset.class).move(2);
+//        rs.last();
+//        System.out.println(rs.size());
+//        System.out.println(rs.getRow());
+//        assertTrue(rs.last());
+//        assertEquals(rs.size(), rs.getRow());
     }
 
     @Test
@@ -133,6 +171,22 @@ class WinSearchResultSetTest {
         while (rs.next()) {
             assertEquals(System_Image_VerticalSize, rs.getInt(4));
             assertThrowsExactly(IllegalStateException.class, ()-> rs.getString(3));
+        }
+    }
+
+    @Test
+    void getOptional() throws SQLException {
+        WinSearchResultSet rs = getOneRecordResultSet();
+        assertThrowsExactly(WinSearchSQLException.class, ()->rs.getObject(0));
+        while (rs.next()) {
+            assertTrue(rs.getOptional(0).isPresent());
+            assertInstanceOf(String.class, rs.getOptional(0).get());
+            assertTrue(rs.getOptional(3).isPresent());
+            assertInstanceOf(Date.class, rs.getOptional(3).get());
+            assertTrue(rs.getOptional(4).isPresent());
+            assertInstanceOf(Integer.class, rs.getOptional(4).get());
+            assertThrowsExactly(WinSearchSQLException.class, ()->rs.getObject(5));
+            assertTrue(rs.getOptional(5).isEmpty());
         }
     }
 

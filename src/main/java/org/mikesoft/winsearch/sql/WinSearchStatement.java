@@ -30,7 +30,7 @@ public class WinSearchStatement implements Statement {
                 throw new WinSearchSQLException("Error of retrieving data from SQL: possibly faulty SQL query\n" + sql);
             throw new RuntimeException(e);
         }
-        if (!rs.isBOF()) rs.move(-1);
+        if (!rs.isBOF()) rs.movePrevious();
         resultSet = new WinSearchResultSet(rs, this);
         return resultSet;
     }
