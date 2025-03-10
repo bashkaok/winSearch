@@ -17,15 +17,15 @@ class QueryBuilderTest {
         //Empty property list
         assertThrowsExactly(IllegalArgumentException.class, () -> QueryBuilder.build(
                 new ArrayList<String>(),
-                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Shallow)),
-                QueryBuilder.FullText.FreeText)
+                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.TraversalPredicate.Shallow)),
+                QueryBuilder.FullTextPredicate.FreeText)
         );
 
         //Full-text columns not in property list
         assertThrowsExactly(IllegalArgumentException.class, () -> QueryBuilder.build(
                         List.of("System.ItemPathDisplay", "System.FileName"),
-                        Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Shallow)),
-                        QueryBuilder.FullText.FreeText,
+                        Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.TraversalPredicate.Shallow)),
+                        QueryBuilder.FullTextPredicate.FreeText,
                         "System.FileDisplayName"
                 )
         );
@@ -40,8 +40,8 @@ class QueryBuilderTest {
                 """;
         assertEquals(shallow_freeText_Sql.trim(), QueryBuilder.build(
                 List.of(Property.SystemItemPathDisplay, Property.SystemFileName),
-                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Shallow)),
-                QueryBuilder.FullText.FreeText
+                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.TraversalPredicate.Shallow)),
+                QueryBuilder.FullTextPredicate.FreeText
         ).trim());
 
         final String deep_contains_Sql = """
@@ -51,8 +51,8 @@ class QueryBuilderTest {
                 """;
         assertEquals(deep_contains_Sql.trim(), QueryBuilder.build(
                 List.of(Property.SystemItemPathDisplay, Property.SystemFileName),
-                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Deep)),
-                QueryBuilder.FullText.Contains
+                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.TraversalPredicate.Deep)),
+                QueryBuilder.FullTextPredicate.Contains
         ).trim());
 
     }
@@ -62,13 +62,13 @@ class QueryBuilderTest {
         final String sql = """
                 SELECT System.ItemPathDisplay, System.FileName
                 FROM SystemIndex
-                WHERE (DIRECTORY='file:D:\\Tools\\test-path2' OR SCOPE='file:D:\\Tools\\test-test_path') AND CONTAINS(System.ItemPathDisplay,System.FileName, '%s')
+                WHERE (DIRECTORY='file:D:\\Tools\\test-path2' OR SCOPE='file:D:\\Tools\\test-test_path') AND CONTAINS(System.FileName,System.ItemPathDisplay, '%s')
                 """;
         assertEquals(sql.trim(), QueryBuilder.build(
                 List.of(Property.SystemItemPathDisplay, Property.SystemFileName),
-                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.Traversal.Deep),
-                        QueryBuilder.Folder.of(Path.of("D:\\Tools\\test-path2"), QueryBuilder.Traversal.Shallow)),
-                QueryBuilder.FullText.Contains,
+                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.TraversalPredicate.Deep),
+                        QueryBuilder.Folder.of(Path.of("D:\\Tools\\test-path2"), QueryBuilder.TraversalPredicate.Shallow)),
+                QueryBuilder.FullTextPredicate.Contains,
                 Property.SystemItemPathDisplay, Property.SystemFileName
         ).trim());
     }
@@ -79,12 +79,12 @@ class QueryBuilderTest {
         final String sql = """
                 SELECT System.ItemPathDisplay, System.FileName
                 FROM SystemIndex
-                WHERE CONTAINS(System.ItemPathDisplay,System.FileName, '%s')
+                WHERE CONTAINS(System.FileName,System.ItemPathDisplay, '%s')
                 """;
         assertEquals(sql.trim(), QueryBuilder.build(
                 List.of(Property.SystemItemPathDisplay, Property.SystemFileName),
                 Set.of(),
-                QueryBuilder.FullText.Contains,
+                QueryBuilder.FullTextPredicate.Contains,
                 Property.SystemItemPathDisplay, Property.SystemFileName
         ).trim());
 
