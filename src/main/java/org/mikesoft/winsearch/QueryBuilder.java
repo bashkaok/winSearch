@@ -1,5 +1,7 @@
 package org.mikesoft.winsearch;
 
+import org.mikesoft.winsearch.properties.Core;
+
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -59,21 +61,21 @@ public class QueryBuilder {
     /**
      * Overloaded method {@link #build(List, Set, FullText, String...)}
      *
-     * @param properties        List of {@link Property}
+     * @param properties        List of {@link Core}
      * @param folders           where will be done the searching List of {@link Folder Folder}
      * @param fullTextPredicate full-text or one column searching {@link FullText FullText}
-     * @param fullText          List of {@link Property}
+     * @param fullText          List of {@link Core}
      * @return SQL formatted string
      */
-    public static String build(List<Property> properties,
+    public static String build(List<Core> properties,
                                Set<Folder> folders,
                                FullText fullTextPredicate,
-                               Property... fullText) {
+                               Core... fullText) {
 
-        return build(properties.stream().map(Property::getName).toList(),
+        return build(properties.stream().map(Core::getName).toList(),
                 folders, fullTextPredicate,
                 Arrays.stream(fullText)
-                        .map(Property::getName)
+                        .map(Core::getName)
                         .toArray(String[]::new)
         );
     }

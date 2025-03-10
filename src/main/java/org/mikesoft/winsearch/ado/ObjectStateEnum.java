@@ -4,7 +4,9 @@ import java.util.Arrays;
 
 /**
  * Specifies whether an object is open or closed, connecting to a data source, executing a command, or retrieving data
- * @see <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/objectstateenum?view=sql-server-ver15">ObjectStateEnum</a>
+ *  <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/objectstateenum?view=sql-server-ver15">MS Learn</a>
+ * @see ADOConnection
+ * @see ADORecordset
  */
 public enum ObjectStateEnum {
     /**

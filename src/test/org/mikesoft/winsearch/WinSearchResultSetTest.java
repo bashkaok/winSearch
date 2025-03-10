@@ -92,27 +92,29 @@ class WinSearchResultSetTest {
     }
 
     @Test
-    void last() throws SQLException {
-        //The problem with next(num) - only one record step
-//        WinSearchResultSet rs = getAnyRecordsResultSet();
-//        assertTrue(rs.isBeforeFirst());
-//        rs.unwrap(ADORecordset.class).setCacheSize(10);
-//        while(rs.next()) {
-//            System.out.println(rs.getString(0));
-//            System.out.println(rs.getRow());
-//        }
-//        assertTrue(rs.size()>1);
-//        rs.beforeFirst();
-//        assertTrue(rs.isBeforeFirst());
-//        System.out.println(rs.unwrap(ADORecordset.class).cacheSize());
-//
-//        rs.unwrap(ADORecordset.class).moveFirst();
-//        rs.unwrap(ADORecordset.class).move(2);
-//        rs.last();
-//        System.out.println(rs.size());
-//        System.out.println(rs.getRow());
-//        assertTrue(rs.last());
-//        assertEquals(rs.size(), rs.getRow());
+    void last() {
+        //The problem with move(num) - only one record step
+/*
+        WinSearchResultSet rs = getAnyRecordsResultSet();
+        assertTrue(rs.isBeforeFirst());
+        rs.unwrap(ADORecordset.class).setCacheSize(10);
+        while(rs.next()) {
+            System.out.println(rs.getString(0));
+            System.out.println(rs.getRow());
+        }
+        assertTrue(rs.size()>1);
+        rs.beforeFirst();
+        assertTrue(rs.isBeforeFirst());
+        System.out.println(rs.unwrap(ADORecordset.class).cacheSize());
+
+        rs.unwrap(ADORecordset.class).moveFirst();
+        rs.unwrap(ADORecordset.class).move(2);
+        rs.last();
+        System.out.println(rs.size());
+        System.out.println(rs.getRow());
+        assertTrue(rs.last());
+        assertEquals(rs.size(), rs.getRow());
+*/
     }
 
     @Test
@@ -174,11 +176,17 @@ class WinSearchResultSetTest {
         }
     }
 
+    private void printFlags(ResultSet rs) throws SQLException {
+        System.out.println("isBeforeFist="+rs.isBeforeFirst());
+    }
+
     @Test
     void getOptional() throws SQLException {
         WinSearchResultSet rs = getOneRecordResultSet();
         assertThrowsExactly(WinSearchSQLException.class, ()->rs.getObject(0));
+        printFlags(rs);
         while (rs.next()) {
+            printFlags(rs);
             assertTrue(rs.getOptional(0).isPresent());
             assertInstanceOf(String.class, rs.getOptional(0).get());
             assertTrue(rs.getOptional(3).isPresent());
@@ -234,6 +242,8 @@ class WinSearchResultSetTest {
         WinSearchResultSet rs = getOneRecordResultSet();
         assertFalse(rs.isEmpty());
         assertEquals(1, rs.stream().count());
-//        assertEquals(System_FileName, rs.stream().map(r-> r.getString(0)).findAny().orElseThrow());
+        assertTrue(rs.isBeforeFirst());
+        rs.close();
+        assertEquals(0, rs.stream().count());
     }
 }

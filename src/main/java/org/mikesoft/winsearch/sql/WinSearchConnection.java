@@ -19,6 +19,7 @@ public class WinSearchConnection implements Connection {
 
     /**
      * Creates wrapper for {@link ADOConnection}
+     * @param adoConnection {@link ADOConnection} object
      */
     public WinSearchConnection(ADOConnection adoConnection) {
         this.adoConnection = adoConnection;

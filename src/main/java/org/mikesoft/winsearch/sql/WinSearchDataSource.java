@@ -15,6 +15,9 @@ import java.util.logging.Logger;
 public class WinSearchDataSource implements DataSource {
     public static final String CONNECTION_STR = "Provider=Search.CollatorDSO;Extended Properties='Application=Windows';";
 
+    /**
+     * Public no-arg constructor according to {@link DataSource}
+     */
     public WinSearchDataSource(){}
 
     /**

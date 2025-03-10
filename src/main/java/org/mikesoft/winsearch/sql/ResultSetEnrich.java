@@ -33,8 +33,7 @@ public interface ResultSetEnrich {
     /**
      * Stream of ResultSet
      *
-     * @return {@link Stream} with {@link ResultSet}
-     * @throws SQLException when called on closed {@link ResultSet}
+     * @return {@link Stream Stream&lt;WinSearchResultSet&gt;} | empty {@link Stream} if an exception was thrown
      */
-    Stream<ResultSet> stream() throws SQLException;
+    Stream<ResultSet> stream();
 }

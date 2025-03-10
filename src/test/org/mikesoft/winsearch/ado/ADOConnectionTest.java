@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mikesoft.winsearch.ado.ConnectModeEnum.adModeUnknown;
-import static org.mikesoft.winsearch.ado._Recordset.CursorTypeEnum.adOpenStatic;
+import static org.mikesoft.winsearch.ado.CursorTypeEnum.adOpenStatic;
 import static org.mikesoft.winsearch.ado.ObjectStateEnum.adStateClosed;
 import static org.mikesoft.winsearch.ado.ObjectStateEnum.adStateOpen;
 

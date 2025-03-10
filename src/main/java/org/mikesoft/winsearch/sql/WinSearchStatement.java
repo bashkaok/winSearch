@@ -3,6 +3,8 @@ package org.mikesoft.winsearch.sql;
 import com.sun.jna.platform.win32.COM.COMInvokeException;
 import org.mikesoft.winsearch.ado.COMFactory;
 import org.mikesoft.winsearch.ado.ADORecordset;
+import org.mikesoft.winsearch.ado.CursorTypeEnum;
+import org.mikesoft.winsearch.ado.LockTypeEnum;
 
 import java.sql.*;
 
@@ -22,8 +24,8 @@ public class WinSearchStatement implements Statement {
         ADORecordset rs = COMFactory.newRecordSet();
         try {
             rs.open(sql, connection.getAdoConnection(),
-                    ADORecordset.CursorTypeEnum.adOpenStatic,
-                    ADORecordset.LockTypeEnum.adLockReadOnly,
+                    CursorTypeEnum.adOpenStatic,
+                    LockTypeEnum.adLockReadOnly,
                     ADORecordset.adCmdUnspecified);
         } catch (COMInvokeException e) {
             if (e.getHresult().intValue() == 0x80020009)

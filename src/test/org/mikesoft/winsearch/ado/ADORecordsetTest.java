@@ -11,6 +11,8 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mikesoft.winsearch.ado.ADORecordset.adCmdUnspecified;
 import static org.mikesoft.winsearch.ado.ObjectStateEnum.adStateOpen;
+import static org.mikesoft.winsearch.ado.CursorTypeEnum.adOpenStatic;
+import static org.mikesoft.winsearch.ado.LockTypeEnum.adLockReadOnly;
 
 class ADORecordsetTest {
     static ADOConnection con;
@@ -23,23 +25,23 @@ class ADORecordsetTest {
 
     private static ADORecordset getOneRecordset() {
         final String sql = """
-                    SELECT System.ItemName, System.FileName, System.ItemNameDisplay
-                    FROM SystemIndex
-                    WHERE DIRECTORY='file:D:/Tools/Java/winSearch/src/test/resources/test-data' AND CONTAINS(*,'standby.png')
-                    """;
+                SELECT System.ItemName, System.FileName, System.ItemNameDisplay
+                FROM SystemIndex
+                WHERE DIRECTORY='file:D:/Tools/Java/winSearch/src/test/resources/test-data' AND CONTAINS(*,'standby.png')
+                """;
         ADORecordset rs = COMFactory.newRecordSet();
-        rs.open(sql, con, _Recordset.CursorTypeEnum.adOpenStatic, _Recordset.LockTypeEnum.adLockReadOnly, adCmdUnspecified);
+        rs.open(sql, con, adOpenStatic, adLockReadOnly, adCmdUnspecified);
         return rs;
     }
 
     private static ADORecordset getAnyRecordset() {
         final String sql = """
-                    SELECT System.ItemName, System.FileName, System.ItemNameDisplay
-                    FROM SystemIndex
-                    WHERE SCOPE='file:D:/Tools/Java/winSearch/src/test/resources/test-data'
-                    """;
+                SELECT System.ItemName, System.FileName, System.ItemNameDisplay
+                FROM SystemIndex
+                WHERE SCOPE='file:D:/Tools/Java/winSearch/src/test/resources/test-data'
+                """;
         ADORecordset rs = COMFactory.newRecordSet();
-        rs.open(sql, con, _Recordset.CursorTypeEnum.adOpenStatic, _Recordset.LockTypeEnum.adLockReadOnly, adCmdUnspecified);
+        rs.open(sql, con, adOpenStatic, adLockReadOnly, adCmdUnspecified);
         return rs;
     }
 
@@ -58,14 +60,14 @@ class ADORecordsetTest {
     @Test
     void getRecordCount() {
         ADORecordset rs = getOneRecordset();
-        assertEquals(1,rs.absolutePosition());
+        assertEquals(1, rs.absolutePosition());
         assertEquals(1, rs.getRecordCount());
-        assertEquals(1,rs.absolutePosition());
+        assertEquals(1, rs.absolutePosition());
 
         rs = getAnyRecordset();
-        assertEquals(1,rs.absolutePosition());
-        assertTrue(rs.getRecordCount()>1);
-        assertEquals(1,rs.absolutePosition());
+        assertEquals(1, rs.absolutePosition());
+        assertTrue(rs.getRecordCount() > 1);
+        assertEquals(1, rs.absolutePosition());
 
     }
 
@@ -85,20 +87,20 @@ class ADORecordsetTest {
     void move() {
         ADORecordset rs = getOneRecordset();
         int count = 0;
-        while(!rs.isEOF()) {
+        while (!rs.isEOF()) {
             rs.moveNext();
             count++;
         }
-        assertEquals(1,count);
+        assertEquals(1, count);
         rs.moveFirst();
         rs.move(-1);
         rs.move(1);
         count = 0;
-        while(!rs.isEOF()) {
+        while (!rs.isEOF()) {
             rs.moveNext();
             count++;
         }
-        assertEquals(1,count);
+        assertEquals(1, count);
 
     }
 
@@ -107,7 +109,7 @@ class ADORecordsetTest {
         ADORecordset rs = getOneRecordset();
 //        System.out.println("BOF=" + rs.isBOF() + " : EOF=" + rs.isEOF() + " : absolutePosition=" + rs.absolutePosition());
         rs.moveNext();
-        assertEquals(_Recordset.PositionEnum.adPosEOF.getValue(), rs.absolutePosition());
+        assertEquals(PositionEnum.adPosEOF.getValue(), rs.absolutePosition());
         rs.moveFirst();
         assertEquals(1, rs.absolutePosition());
     }
@@ -131,22 +133,22 @@ class ADORecordsetTest {
     void incorrectSQL() {
         final String sql = "SELECT System.ItemName FROM SystemIndex WHERE SCOPE='file:E:/downloads'";
         ADORecordset rs = COMFactory.newRecordSet();
-        rs.open(sql, con);
-        System.out.println(rs.isEOF());
-        System.out.println(rs.isBOF());
+        rs.open(sql, con, adOpenStatic, adLockReadOnly, adCmdUnspecified);
+        assertTrue(rs.isEOF() && rs.isBOF());
 
     }
+
     @Test
     void oneRecordRecordSet() {
         ADORecordset rs = getOneRecordset();
-        assertEquals(_Recordset.CursorTypeEnum.adOpenStatic, _Recordset.CursorTypeEnum.valueOf(rs.cursorType()));
+        assertEquals(adOpenStatic, CursorTypeEnum.valueOf(rs.cursorType()));
         System.out.println(rs.lockType());
         System.out.println(rs.getRecordCount());
         rs.move(-1);
         assertTrue(rs.isBOF());
         int count = 0;
         rs.moveFirst();
-        while(!rs.isEOF()) {
+        while (!rs.isEOF()) {
             rs.moveNext();
             count++;
         }
@@ -163,9 +165,8 @@ class ADORecordsetTest {
         assertFalse(rs.isEOF());
         rs.getRows();
         assertTrue(rs.isEOF());
+        assertThrowsExactly(COMInvokeException.class, () -> rs.getRows(1));
     }
-
-
 
 
 }

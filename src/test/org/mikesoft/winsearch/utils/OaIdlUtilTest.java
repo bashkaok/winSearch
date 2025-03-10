@@ -2,9 +2,7 @@ package org.mikesoft.winsearch.utils;
 
 import com.sun.jna.platform.win32.OaIdl;
 import org.junit.jupiter.api.Test;
-import org.mikesoft.winsearch.ado.COMFactory;
-import org.mikesoft.winsearch.ado.ADOConnection;
-import org.mikesoft.winsearch.ado.ADORecordset;
+import org.mikesoft.winsearch.ado.*;
 import org.mikesoft.winsearch.sql.WinSearchDataSource;
 
 import java.util.Arrays;
@@ -25,7 +23,7 @@ class OaIdlUtilTest {
                 """;
         ADOConnection con = WinSearchDataSource.newADOConnection();
         ADORecordset rs = COMFactory.newRecordSet();
-        rs.open(sql, con, ADORecordset.CursorTypeEnum.adOpenStatic, ADORecordset.LockTypeEnum.adLockReadOnly, adCmdUnspecified);
+        rs.open(sql, con, CursorTypeEnum.adOpenStatic, LockTypeEnum.adLockReadOnly, adCmdUnspecified);
         return rs;
     }
 

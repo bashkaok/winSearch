@@ -9,9 +9,11 @@ import com.sun.jna.platform.win32.COM.util.annotation.ComProperty;
 import com.sun.jna.platform.win32.COM.COMInvokeException;
 
 /**
- * Mapped interface of ADODB.Connection.6.0 (C:\Program Files\Common Files\System\ado\msado15.dll)
- * <p> guid({00000514-0000-0010-8000-00AA006D2EA4})</p>
- * @see <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/connection-object-ado?view=sql-server-ver15">Connection Object (ADO)</a>
+ * A Connection object represents a unique session with a data source
+ * <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/connection-object-ado?view=sql-server-ver15">MS Learn</a>
+ * <p>
+ * Mapped interface of ADODB.Connection.6.0 (C:\Program Files\Common Files\System\ado\msado15.dll)<br>
+ * guid({00000514-0000-0010-8000-00AA006D2EA4})
  */
 
 @ComObject(clsId = "{00000514-0000-0010-8000-00AA006D2EA4}", progId = "{B691E011-1797-432E-907A-4D8C69339129}")
@@ -31,15 +33,28 @@ interface _Connection {
     @ComProperty(name = "ConnectionString")
     String getConnectionString();
 
+    /**
+     * Gets open mode value.
+     *
+     * @return long value of {@link ConnectModeEnum}
+     */
     @ComProperty(name = "Mode")
     long mode();
+
     /**
      * Sets open mode
+     *
      * @param mode {@link ConnectModeEnum}
      * @throws COMInvokeException when connection is opened
      */
     @ComProperty(name = "Mode")
     void setMode(ConnectModeEnum mode);
+
+    /**
+     * Indicates for all applicable objects whether the state of the object is open or closed
+     *
+     * @return long value of {@link ObjectStateEnum}
+     */
 
     @ComProperty(name = "State")
     long state();
@@ -56,7 +71,8 @@ interface _Connection {
 
     /**
      * Executes specified SQL query
-     * @param sql SQL statement
+     *
+     * @param sql   SQL statement
      * @param count returns the number of records that the operation affected (for update and insert queries)
      * @return {@link ADORecordset}
      * @see <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/execute-method-ado-connection?view=sql-server-ver15">Execute Method (ADO Connection)</a>
@@ -65,7 +81,8 @@ interface _Connection {
     ADORecordset execute(String sql, long count);
 
     /**
-     * Overloaded {@link #execute(String, long)} execute}
+     * Overloaded {@link #execute(String, long)}
+     *
      * @param sql SQL statement
      * @return @return {@link ADORecordset}
      */
@@ -77,7 +94,7 @@ interface _Connection {
      * memberId(10)</p>
      */
     @ComMethod(name = "Open")
-    void open(String ConnectionString,
+    void open(String connectionString,
               String UserID,
               String Password,
               int Options);
@@ -86,28 +103,3 @@ interface _Connection {
     void open();
 }
 
-/**
- * Specifies the available permissions for modifying data in a {@link ADOConnection}, opening a <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/record-object-ado?view=sql-server-ver15">Record</a>
- * @see <a href="https://learn.microsoft.com/en-us/previous-versions/sql/ado/reference/ado-api/connectmodeenum?view=sql-server-ver15">ConnectModeEnum</a>
- */
-@SuppressWarnings("unused")
-enum ConnectModeEnum {
-    adModeRead(1),
-    adModeReadWrite(3),
-    adModeRecursive(0x400000),
-    adModeShareDenyNone(16),
-    adModeShareDenyRead(4),
-    adModeShareDenyWrite(8),
-    adModeShareExclusive(12),
-    adModeUnknown(0),
-    adModeWrite(2);
-
-    private final long value;
-    ConnectModeEnum(long value) {
-        this.value = value;
-    }
-
-    public long getValue() {
-        return value;
-    }
-}
