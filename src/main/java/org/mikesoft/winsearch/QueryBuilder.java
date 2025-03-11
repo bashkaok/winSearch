@@ -1,7 +1,5 @@
 package org.mikesoft.winsearch;
 
-import org.mikesoft.winsearch.properties.Core;
-
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,50 +31,67 @@ public class QueryBuilder {
      * For further use: sql.formatted("matching conditions");<br>
      *
      * @param properties        for select clause column
-     * @param folders           where will be done the searching set of {@link Folder Folder}
-     * @param fullTextPredicate full-text or one column searching {@link FullText FullText}
-     * @param fullText          Optional. If the array is specified, the searching will be complete only in specified columns
+     * @param folders           where will be done the searching, Set of {@link Folder Folder}
+     * @param fullTextPredicate {@link FullTextPredicate#FreeText FREETEXT} or {@link FullTextPredicate#Contains CONTAINS} searching {@link FullTextPredicate FullTextPredicate}
+     * @param fullTextColumns   the limit of the search to a single column or a column group
      * @return SQL formatted String: "SELECT ... FROM SystemIndex WHERE SCOPE|DIRECTORY=(...) AND FREETEXT|CONTAINS(..., %s)"
      */
     public static String build(List<String> properties,
                                Set<Folder> folders,
-                               FullText fullTextPredicate,
-                               String... fullText) {
+                               FullTextPredicate fullTextPredicate,
+                               Set<String> fullTextColumns) {
 
         if (properties.isEmpty())
             throw new IllegalArgumentException("The property list cannot be empty");
 
-        if (fullText.length > 0 && !new HashSet<>(properties).containsAll(List.of(fullText)))
+        if (!fullTextColumns.isEmpty() && !new HashSet<>(properties).containsAll(fullTextColumns))
             throw new IllegalArgumentException("Full-text columns must be in property list");
 
         List<String> statement = new ArrayList<>();
         statement.add(buildSelectClause(properties));
         statement.add("FROM SystemIndex");
-        statement.add(buildWhereClause(folders, fullTextPredicate,
-                Arrays.stream(fullText).toList()));
+        statement.add(buildWhereClause(folders, fullTextPredicate, fullTextColumns));
 
         return String.join("\n", statement);
     }
 
     /**
-     * Overloaded method {@link #build(List, Set, FullText, String...)}
+     * Overloaded method {@link #build(List, Set, FullTextPredicate, Set)}
      *
-     * @param properties        List of {@link Core}
-     * @param folders           where will be done the searching List of {@link Folder Folder}
-     * @param fullTextPredicate full-text or one column searching {@link FullText FullText}
-     * @param fullText          List of {@link Core}
-     * @return SQL formatted string
+     * @param properties        list of property string names
+     * @param folders           where will be done the searching, Set of {@link Folder Folder}
+     * @param fullTextPredicate {@link FullTextPredicate#FreeText FREETEXT} or {@link FullTextPredicate#Contains CONTAINS} searching {@link FullTextPredicate FullTextPredicate}
+     * @param fullTextColumns   Optional. List of {@link String} column names. Duplicate columns are ignored
+     * @return SQL formatted string: "SELECT ... WHERE ...'%s'"
      */
-    public static String build(List<Core> properties,
+    public static String build(List<String> properties,
                                Set<Folder> folders,
-                               FullText fullTextPredicate,
-                               Core... fullText) {
+                               FullTextPredicate fullTextPredicate,
+                               String... fullTextColumns) {
+        return build(properties, folders, fullTextPredicate, Arrays.stream(fullTextColumns).collect(Collectors.toSet()));
+    }
 
-        return build(properties.stream().map(Core::getName).toList(),
-                folders, fullTextPredicate,
-                Arrays.stream(fullText)
-                        .map(Core::getName)
-                        .toArray(String[]::new)
+
+    /**
+     * Overloaded method {@link #build(List, Set, FullTextPredicate, Set)}
+     *
+     * @param properties        List of {@link Property}
+     * @param folders           where will be done the searching, Set of {@link Folder Folder}
+     * @param fullTextPredicate {@link FullTextPredicate#FreeText FREETEXT} or {@link FullTextPredicate#Contains CONTAINS} searching {@link FullTextPredicate FullTextPredicate}
+     * @param fullTextColumns   Optional. List of {@link Property} columns. Duplicate columns are ignored
+     * @return @return SQL formatted string: "SELECT ... WHERE ...'%s'"
+     */
+    public static String build(List<Property> properties,
+                               Set<Folder> folders,
+                               FullTextPredicate fullTextPredicate,
+                               Property... fullTextColumns) {
+
+        return build(properties.stream().map(Property::getName).toList(),
+                folders,
+                fullTextPredicate,
+                Arrays.stream(fullTextColumns)
+                        .map(Property::getName)
+                        .collect(Collectors.toSet())
         );
     }
 
@@ -84,14 +99,14 @@ public class QueryBuilder {
         return "SELECT " + String.join(DELIMITER, properties);
     }
 
-    private static String buildWhereClause(Set<Folder> folders, FullText fullTextPredicate, List<String> fullText) {
+    private static String buildWhereClause(Set<Folder> folders, FullTextPredicate fullTextPredicate, Set<String> fullTextColumns) {
         final String WHERE_DELIMITER = " AND ";
         List<String> clause = new ArrayList<>();
         buildFolderPart(folders)
                 .filter(str -> !str.isEmpty())
                 .map(str -> "(" + str + ")")
                 .ifPresent(clause::add);
-        clause.add(buildFullTextPart(fullTextPredicate, fullText));
+        clause.add(buildFullTextPart(fullTextPredicate, fullTextColumns.stream().sorted().toList()));
         return "WHERE " + String.join(WHERE_DELIMITER, clause);
     }
 
@@ -116,11 +131,11 @@ public class QueryBuilder {
      * WHERE... [<a href="https://learn.microsoft.com/en-us/windows/win32/search/-search-sql-contains">CONTAINS</a>(["&lt;fulltext_column>",]'&lt;contains_condition>'[,&lt;<a href="https://learn.microsoft.com/en-us/windows/win32/search/-search-sql-specifyinglanguages">LCID</a>>])<br>
      * | <a href="https://learn.microsoft.com/en-us/windows/win32/search/-search-sql-freetext">FREETEXT</a>(["&lt;fulltext_column>",]'&lt;freetext_condition>'[,&lt;LCID>])]
      *
-     * @param fullTextPredicate {@link FullText FullText} predicate: {@link FullText#Contains Contain} | {@link FullText#FreeText FreeText}
+     * @param fullTextPredicate {@link FullTextPredicate FullText} predicate: {@link FullTextPredicate#Contains Contain} | {@link FullTextPredicate#FreeText FreeText}
      * @param fullTextColumns   column names
      * @return string with part of WHERE clause
      */
-    private static String buildFullTextPart(FullText fullTextPredicate, List<String> fullTextColumns) {
+    private static String buildFullTextPart(FullTextPredicate fullTextPredicate, List<String> fullTextColumns) {
         return fullTextPredicate.getPredicate() + "(" +
                 (fullTextColumns.isEmpty() ? "*" : String.join(",", fullTextColumns)) +
                 ", '%s'" +
@@ -132,12 +147,12 @@ public class QueryBuilder {
      *
      * @see <a href="https://learn.microsoft.com/en-us/windows/win32/search/-search-sql-folderdepth">SCOPE and DIRECTORY Predicates</a>
      */
-    public enum Traversal {
+    public enum TraversalPredicate {
         Shallow("DIRECTORY"),
         Deep("SCOPE");
         private final String predicate;
 
-        Traversal(String predicate) {
+        TraversalPredicate(String predicate) {
             this.predicate = predicate;
         }
 
@@ -153,12 +168,12 @@ public class QueryBuilder {
      *
      * @see <a href="https://learn.microsoft.com/en-us/windows/win32/search/-search-sql-fulltextpredicates">Full-Text Predicates</a>
      */
-    public enum FullText {
+    public enum FullTextPredicate {
         Contains("CONTAINS"),
         FreeText("FREETEXT");
         private final String predicate;
 
-        FullText(String predicate) {
+        FullTextPredicate(String predicate) {
             this.predicate = predicate;
         }
 
@@ -173,13 +188,13 @@ public class QueryBuilder {
     }
 
     /**
-     * Container for pair {@link Path}:{@link Traversal Traversal}
+     * Container for pair {@link Path}:{@link TraversalPredicate Traversal}
      */
     public static class Folder {
         private final Path path;
-        private final QueryBuilder.Traversal traversal;
+        private final TraversalPredicate traversal;
 
-        private Folder(Path path, QueryBuilder.Traversal traversal) {
+        private Folder(Path path, TraversalPredicate traversal) {
             this.path = path;
             this.traversal = traversal;
         }
@@ -188,11 +203,11 @@ public class QueryBuilder {
             return path;
         }
 
-        public QueryBuilder.Traversal getTraversal() {
+        public TraversalPredicate getTraversal() {
             return traversal;
         }
 
-        public static Folder of(Path path, QueryBuilder.Traversal traversal) {
+        public static Folder of(Path path, TraversalPredicate traversal) {
             return new Folder(path, traversal);
         }
 

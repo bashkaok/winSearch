@@ -106,7 +106,7 @@ public class WinSearchConnection implements Connection {
      * Interface implementation
      */
     @Override
-    public boolean isClosed() throws SQLException {
+    public boolean isClosed() throws SQLException {//TODO Remove throwing
         return this.adoConnection.state() == adStateClosed.getValue();
     }
 
