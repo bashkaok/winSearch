@@ -5,7 +5,7 @@ package org.mikesoft.winsearch.properties;
  * @see <a href="https://learn.microsoft.com/en-us/windows/win32/properties/props">Windows Property System</a>
  *
  */
-public enum Core {
+public enum Core implements WinProperty{
     /**
      * Core - <a href="https://learn.microsoft.com/en-us/windows/win32/properties/props-system-dateaccessed">System.DateAccessed</a> Indicates the last time the item was accessed
      */
@@ -82,6 +82,7 @@ public enum Core {
      *
      * @return {@link String}
      */
+    @Override
     public String getName() {
         return name;
     }

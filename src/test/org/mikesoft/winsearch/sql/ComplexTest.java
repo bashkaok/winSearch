@@ -1,8 +1,6 @@
-package org.mikesoft.winsearch;
+package org.mikesoft.winsearch.sql;
 
 import org.junit.jupiter.api.Test;
-import org.mikesoft.winsearch.sql.WinSearchDataSource;
-import org.mikesoft.winsearch.sql.WinSearchResultSet;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;

@@ -1,6 +1,7 @@
 package org.mikesoft.winsearch;
 
 import org.junit.jupiter.api.Test;
+import org.mikesoft.winsearch.properties.Core;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ class QueryBuilderTest {
                 WHERE (DIRECTORY='file:D:\\Tools\\test-test_path') AND FREETEXT(*, '%s')
                 """;
         assertEquals(shallow_freeText_Sql.trim(), QueryBuilder.build(
-                List.of(Property.SystemItemPathDisplay, Property.SystemFileName),
+                List.of(Core.SystemItemPathDisplay, Core.SystemFileName),
                 Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.TraversalPredicate.Shallow)),
                 QueryBuilder.FullTextPredicate.FreeText
         ).trim());
@@ -50,7 +51,7 @@ class QueryBuilderTest {
                 WHERE (SCOPE='file:D:\\Tools\\test-test_path') AND CONTAINS(*, '%s')
                 """;
         assertEquals(deep_contains_Sql.trim(), QueryBuilder.build(
-                List.of(Property.SystemItemPathDisplay, Property.SystemFileName),
+                List.of(Core.SystemItemPathDisplay, Core.SystemFileName),
                 Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.TraversalPredicate.Deep)),
                 QueryBuilder.FullTextPredicate.Contains
         ).trim());
@@ -65,11 +66,11 @@ class QueryBuilderTest {
                 WHERE (DIRECTORY='file:D:\\Tools\\test-path2' OR SCOPE='file:D:\\Tools\\test-test_path') AND CONTAINS(System.FileName,System.ItemPathDisplay, '%s')
                 """;
         assertEquals(sql.trim(), QueryBuilder.build(
-                List.of(Property.SystemItemPathDisplay, Property.SystemFileName),
+                List.of(Core.SystemItemPathDisplay, Core.SystemFileName),
                 Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.TraversalPredicate.Deep),
                         QueryBuilder.Folder.of(Path.of("D:\\Tools\\test-path2"), QueryBuilder.TraversalPredicate.Shallow)),
                 QueryBuilder.FullTextPredicate.Contains,
-                Property.SystemItemPathDisplay, Property.SystemFileName
+                Core.SystemItemPathDisplay, Core.SystemFileName
         ).trim());
     }
 
@@ -82,10 +83,10 @@ class QueryBuilderTest {
                 WHERE CONTAINS(System.FileName,System.ItemPathDisplay, '%s')
                 """;
         assertEquals(sql.trim(), QueryBuilder.build(
-                List.of(Property.SystemItemPathDisplay, Property.SystemFileName),
+                List.of(Core.SystemItemPathDisplay, Core.SystemFileName),
                 Set.of(),
                 QueryBuilder.FullTextPredicate.Contains,
-                Property.SystemItemPathDisplay, Property.SystemFileName
+                Core.SystemItemPathDisplay, Core.SystemFileName
         ).trim());
 
     }

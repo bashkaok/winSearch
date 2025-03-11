@@ -1,19 +1,19 @@
-package org.mikesoft.winsearch;
+package org.mikesoft.winsearch.sql;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mikesoft.winsearch.ado.ADOConnection;
 import org.mikesoft.winsearch.ado.ADORecordset;
-import org.mikesoft.winsearch.sql.WinSearchResultSet;
-import org.mikesoft.winsearch.sql.WinSearchSQLException;
-import org.mikesoft.winsearch.sql.WinSearchDataSource;
+import org.mikesoft.winsearch.ado.ObjectStateEnum;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mikesoft.winsearch.ado.ObjectStateEnum.adStateClosed;
 
 class WinSearchResultSetTest {
     static Connection con;
@@ -241,9 +241,17 @@ class WinSearchResultSetTest {
     void stream() throws SQLException {
         WinSearchResultSet rs = getOneRecordResultSet();
         assertFalse(rs.isEmpty());
+        //Reusable RecordSet
         assertEquals(1, rs.stream().count());
         assertTrue(rs.isBeforeFirst());
-        rs.close();
+        //Close Statement after use
+        Statement statement = rs.getStatement();
+        ADORecordset adoRs = rs.unwrap(ADORecordset.class);
+        assertEquals(1, rs.stream(statement).count());
+        assertTrue(rs.isClosed()); // ResultSet closed
+        assertEquals(adStateClosed, ObjectStateEnum.valueOf(adoRs.state())); // ADORecordset closed
+        assertTrue(statement.isClosed()); //Statement closed
+        //Empty Stream after close
         assertEquals(0, rs.stream().count());
     }
 }

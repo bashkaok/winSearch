@@ -5,8 +5,6 @@ import com.sun.jna.platform.win32.OaIdl;
 import org.mikesoft.winsearch.ado.ObjectStateEnum;
 import org.mikesoft.winsearch.ado.ADORecordset;
 import org.mikesoft.winsearch.utils.OaIdlUtil;
-import org.mikesoft.winsearch.utils.ThrowingSupplier;
-import org.mikesoft.winsearch.utils.ThrowingSupplierVoid;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -34,6 +32,41 @@ public class WinSearchResultSet implements ResultSet, ResultSetEnrich {
     public WinSearchResultSet(ADORecordset recordset, Statement statement) {
         this.recordset = recordset;
         this.statement = statement;
+    }
+
+    /**
+     * Create {@link Stream} of {@link WinSearchResultSet}
+     *
+     * @param resultSet       {@link WinSearchResultSet}
+     * @param objectsForClose Optional. Objects with implemented interface {@link AutoCloseable} that should be closed after stream processing
+     * @return {@link Stream}&lt;{@link WinSearchResultSet}>
+     */
+    public static Stream<WinSearchResultSet> streamOf(WinSearchResultSet resultSet, AutoCloseable... objectsForClose) {
+        long size;
+        try {
+            if (resultSet.isClosed()) return Stream.empty();
+            resultSet.beforeFirst();
+            size = resultSet.size();
+        } catch (SQLException e) {
+            return Stream.empty();
+        }
+        return StreamSupport.stream(new Spliterators.AbstractSpliterator<>(size, Spliterator.IMMUTABLE) {
+            @Override
+            public boolean tryAdvance(Consumer<? super WinSearchResultSet> action) {
+                try {
+                    if (!resultSet.next()) {
+                        if (objectsForClose.length > 0) {
+                            for (AutoCloseable closeable : objectsForClose) closeable.close();
+                        } else resultSet.beforeFirst();
+                        return false;
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                action.accept(resultSet);
+                return true;
+            }
+        }, false);
     }
 
 
@@ -291,6 +324,12 @@ public class WinSearchResultSet implements ResultSet, ResultSetEnrich {
         return null;
     }
 
+    /**
+     * Returns WinSearchStatement extends {@link Statement} object
+     *
+     * @return {@link WinSearchStatement}
+     * @throws SQLException when called on a closed result set
+     */
     @Override
     public Statement getStatement() throws SQLException {
         assertClosedResultSet();
@@ -1062,33 +1101,22 @@ public class WinSearchResultSet implements ResultSet, ResultSetEnrich {
     /**
      * {@inheritDoc}
      * The ResultSet rests opened after stream processing
+     *
+     * @return {@link Stream Stream&lt;WinSearchResultSet&gt;} | empty {@link Stream} if an exception was thrown
      */
     @Override
-    public Stream<ResultSet> stream() {
-        long size;
-        try {
-            assertClosedResultSet();
-            beforeFirst();
-            size = size();
-        } catch (SQLException e) {
-            return Stream.empty();
-        }
-        WinSearchResultSet rs = this;
-        return StreamSupport.stream(new Spliterators.AbstractSpliterator<>(size, Spliterator.IMMUTABLE) {
-            @Override
-            public boolean tryAdvance(Consumer<? super ResultSet> action) {
-                try {
-                    if (!rs.next()) {
-                        beforeFirst();
-                        return false;
-                    }
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-                action.accept(rs);
-                return true;
-            }
-        }, false);
+    public Stream<WinSearchResultSet> stream() {
+        return streamOf(this);
+    }
+
+    /**
+     * Stream of {@link WinSearchResultSet}
+     *
+     * @param closeObjects Objects with implemented interface {@link AutoCloseable} that should be closed after stream processing
+     * @return {@link Stream Stream&lt;WinSearchResultSet&gt;} | empty {@link Stream} if an exception was thrown
+     */
+    public Stream<WinSearchResultSet> stream(AutoCloseable... closeObjects) {
+        return streamOf(this, closeObjects);
     }
 
     @Override
@@ -1099,6 +1127,11 @@ public class WinSearchResultSet implements ResultSet, ResultSetEnrich {
         } catch (SQLException e) {
             return Optional.empty();
         }
+    }
+
+    @FunctionalInterface
+    public interface ThrowingSupplier<T, E extends Exception> {
+        T get() throws E;
     }
 
     /**
@@ -1117,6 +1150,11 @@ public class WinSearchResultSet implements ResultSet, ResultSetEnrich {
         }
     }
 
+    @FunctionalInterface
+    public interface ThrowingSupplierVoid<E extends Exception> {
+        void get() throws E;
+    }
+
     /**
      * Throwing wrapper
      *
@@ -1132,6 +1170,8 @@ public class WinSearchResultSet implements ResultSet, ResultSetEnrich {
     }
 
     private class CurrentRow {
+
+
         private Object[] row = null;
 
         public void setRow(Object[] row) {
@@ -1156,6 +1196,6 @@ public class WinSearchResultSet implements ResultSet, ResultSetEnrich {
             if (columnIndex >= row.length)
                 throw new WinSearchSQLException("Index " + columnIndex + " out of bounds for length of record " + row.length);
         }
-    }
 
+    }
 }

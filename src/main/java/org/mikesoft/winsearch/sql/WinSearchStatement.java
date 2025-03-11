@@ -14,6 +14,7 @@ import java.sql.*;
 public class WinSearchStatement implements Statement {
     private final WinSearchConnection connection;
     private WinSearchResultSet resultSet;
+    private boolean closed = false;
 
     public WinSearchStatement(WinSearchConnection connection) {
         this.connection = connection;
@@ -45,8 +46,14 @@ public class WinSearchStatement implements Statement {
         return 0;
     }
 
+    /**
+     * Closes the {@link WinSearchStatement}. Also closes the {@link WinSearchResultSet}, if it exists and wrapped {@link ADORecordset}
+     *
+     * @throws SQLException if a access error occurs in {@link ADORecordset} wrapped in {@link WinSearchResultSet}
+     */
     @Override
     public void close() throws SQLException {
+        this.closed = true;
         if (resultSet != null) resultSet.close();
     }
 
@@ -112,10 +119,14 @@ public class WinSearchStatement implements Statement {
     }
 
     /**
-     * @return {@link WinSearchResultSet}
+     * Retrieves the current result as a ResultSet object. This method can be called more once per result
+     *
+     * @return {@link WinSearchResultSet} | null if the result is an update count or there are no more results
+     * @throws WinSearchSQLException when called on a closed Statement
      */
     @Override
-    public ResultSet getResultSet() {
+    public ResultSet getResultSet() throws SQLException {
+        assertClosedStatement();
         return resultSet;
     }
 
@@ -173,14 +184,24 @@ public class WinSearchStatement implements Statement {
         return new int[0];
     }
 
+    /**
+     * Retrieves the Connection object that produced this Statement object.
+     *
+     * @return current Connection object
+     * @throws WinSearchSQLException when called on a closed Statement
+     */
     @Override
     public Connection getConnection() throws SQLException {
+        assertClosedStatement();
         return connection;
     }
 
+    /**
+    * Unsupported
+    */
     @Override
-    public boolean getMoreResults(int current) {
-        return false;
+    public boolean getMoreResults(int current) throws SQLException {
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
@@ -223,9 +244,15 @@ public class WinSearchStatement implements Statement {
         return 0;
     }
 
+    /**
+     * Retrieves whether this Statement object has been closed. A Statement is closed if the method close has been called on it, or if it is automatically closed
+     *
+     * @return true if this Statement object is closed; false if it is still open
+     * @see #close()
+     */
     @Override
-    public boolean isClosed() throws SQLException {
-        return false;
+    public boolean isClosed() {
+        return closed;
     }
 
     @Override
@@ -239,8 +266,8 @@ public class WinSearchStatement implements Statement {
     }
 
     /**
-    * Unsupported
-    */
+     * Unsupported
+     */
     @Override
     public void closeOnCompletion() {
 
@@ -260,4 +287,9 @@ public class WinSearchStatement implements Statement {
     public boolean isWrapperFor(Class<?> iface) {
         return false;
     }
+
+    private void assertClosedStatement() throws SQLException {
+        if (isClosed()) throw new WinSearchSQLException("Statement is closed");
+    }
+
 }

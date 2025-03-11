@@ -1,15 +1,13 @@
-package org.mikesoft.winsearch;
+package org.mikesoft.winsearch.sql;
 
 import org.junit.jupiter.api.Test;
 import org.mikesoft.winsearch.ado.ADOConnection;
-import org.mikesoft.winsearch.sql.WinSearchConnection;
-import org.mikesoft.winsearch.sql.WinSearchDataSource;
 
 import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class WinSearchADOConnectionTest {
+class WinSearchConnectionTest {
 
     @Test
     void isClosed() throws SQLException {

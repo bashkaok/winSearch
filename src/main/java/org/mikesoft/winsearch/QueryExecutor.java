@@ -1,9 +1,11 @@
 package org.mikesoft.winsearch;
 
+import org.mikesoft.winsearch.properties.WinProperty;
 import org.mikesoft.winsearch.sql.WinSearchConnection;
 import org.mikesoft.winsearch.sql.WinSearchResultSet;
 
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -12,42 +14,47 @@ import java.util.stream.Stream;
 import static org.mikesoft.winsearch.QueryBuilder.FullTextPredicate.FreeText;
 
 /**
- * Service for requests to MS Windows Index Search
- * <p>
- * Usage:<br>
- * &emsp;&emsp;&emsp;&emsp; executor = QueryExecutor.builder()<br>
- * &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;.{@link QueryExecutorBuilder#properties(Property...) properties(Property...)} | {@link QueryExecutorBuilder#properties(String...) properties(String...)}<br>
- * &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;.folders({@link java.nio.file.Path Path},{@link QueryBuilder.TraversalPredicate Traversal}...)<br>
- * &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;[.{@link QueryExecutorBuilder#mapper(Function) mapper(Function&lt;ResultSet, Stream&lt;?>>)}<br>
- * &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;.{@link QueryExecutorBuilder#connection(WinSearchConnection) connection(WinSearchConnection)}<br>
- * &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;.build();<br>
- * &emsp;&emsp;&emsp;&emsp; ({@link Stream}) executor.{@link #find(String, boolean)}
+ * Service for requests to MS Windows Index Search<br>
+ * <p>Usage:
+ * <pre>{@code      executor = QueryExecutor.builder()
+ *              .properties(WinProperty...) | properties(String...)
+ *              .folders(Folder.of(Path, TraversalPredicate)...) // optional
+ *              .fullTextPredicate(FreeText | Contains]
+ *              .fullTextColumns(WinProperty...) | fullTextColumns(String...) // optional
+ *              .connection(WinSearchConnection)
+ *              .build();
+ *      executor.find(String, boolean [, mapper]);
+ *      }
+ * </pre>
+ * You can use manually build:
+ * <pre> {@code
+ *         executor = QueryExecutor.builder().buildEmpty();
+ *         String SQL = """
+ *                 SELECT System.FileName, System.ItemPathDisplay
+ *                 FROM SystemIndex
+ *                 WHERE (DIRECTORY='file:D:/test-data') AND CONTAINS(*, '%s')
+ *                 """;
+ *         executor.setSqlStatement(SQL);
+ *         executor.setConnection(con);
+ *         executor.find(smth, true [, mapper]);}
+ * </pre>
  */
 public class QueryExecutor {
-    //TODO ResultSet Refactoring: make return Stream.Empty when exception
-    public static final Function<WinSearchResultSet, Stream<?>> DEFAULT_MAPPER = resultSet -> {
-        try {
-            return resultSet.stream();
-        } catch (SQLException e) {
-            return Stream.empty();
-        }
-    };
+    private static final Mapper<Stream<WinSearchResultSet>> DEFAULT_MAPPER = stream -> stream;
     private WinSearchConnection connection;
     private String sqlStatement;
     private final List<String> propertyNames = new ArrayList<>();
     private final Set<QueryBuilder.Folder> folders = new HashSet<>();
     private QueryBuilder.FullTextPredicate fullTextPredicate = FreeText;
-    private Set<String> fulltextColumns = new HashSet<>();
-    private Function<WinSearchResultSet, Stream<?>> mapper;
+    private final Set<String> fulltextColumns = new HashSet<>();
 
     private QueryExecutor() {
-        setMapper(DEFAULT_MAPPER);
     }
 
     /**
-     * Adds string names of {@link Property} to SQL query. Duplicate property names are ignored
+     * Adds string names of {@link org.mikesoft.winsearch.properties.WinProperty WinProperty} to SQL query. Duplicate property names are ignored
      *
-     * @param properties {@link Property} names string values
+     * @param properties {@link org.mikesoft.winsearch.properties.WinProperty WinProperty} names string values
      */
     public void addPropertyNames(List<String> properties) {
         properties.stream()
@@ -56,13 +63,13 @@ public class QueryExecutor {
     }
 
     /**
-     * Adds string names of {@link Property} to SQL query. Duplicate property names are ignored
+     * Adds string names of {@link org.mikesoft.winsearch.properties.WinProperty WinProperty} to SQL query. Duplicate property names are ignored
      *
-     * @param properties {@link Property}
+     * @param properties {@link org.mikesoft.winsearch.properties.WinProperty WinProperty}
      */
-    public void addProperties(List<Property> properties) {
+    public void addProperties(List<WinProperty> properties) {
         addPropertyNames(properties.stream()
-                .map(Property::getName)
+                .map(WinProperty::getName)
                 .toList());
     }
 
@@ -104,19 +111,6 @@ public class QueryExecutor {
         return fulltextColumns;
     }
 
-    /**
-     * Sets mapper for result stream.
-     *
-     * @param mapper {@link Function Function&lt;WinSearchResultSet, Stream&lt;?>>}
-     */
-    public void setMapper(Function<WinSearchResultSet, Stream<?>> mapper) {
-        this.mapper = mapper;
-    }
-
-    public Function<WinSearchResultSet, Stream<?>> getMapper() {
-        return mapper;
-    }
-
     public void setConnection(WinSearchConnection connection) {
         this.connection = connection;
     }
@@ -125,6 +119,12 @@ public class QueryExecutor {
         return sqlStatement;
     }
 
+    /**
+     * Sets ready SQL query to Windows Index Search
+     * <p>Further call of the {@link #buildQuery()} replaces this statement
+     *
+     * @param sqlStatement SQL string
+     */
     public void setSqlStatement(String sqlStatement) {
         this.sqlStatement = sqlStatement;
     }
@@ -147,14 +147,39 @@ public class QueryExecutor {
      * @param strictMatch true - strict match
      * @throws IllegalStateException when the service is closed
      */
-    public Stream<?> find(String findStr, boolean strictMatch) {
-        if (connection == null)
-                throw new IllegalStateException("Connection not set");
 
-        try (var st = connection.createStatement()) {
+    public Stream<WinSearchResultSet> find(String findStr, boolean strictMatch) {
+        return find(findStr, strictMatch, DEFAULT_MAPPER);
+    }
+
+    /**
+     * Interface for simplify use of the mapper function
+     * {@link Function}{@code <Stream<WinSearchResultSet>, R>}
+     *
+     * @param <R> type of mapper result
+     */
+    @FunctionalInterface
+    public interface Mapper<R> extends Function<Stream<WinSearchResultSet>, R> {
+    }
+
+    /**
+     * Finds the specified String with match condition
+     *
+     * @param findStr     String to find
+     * @param strictMatch true - strict match
+     * @param mapper      {@link Mapper Mapper&lt;R>}.
+     * @param <R>         type of mapper result
+     * @return mapper result
+     * @throws IllegalStateException when the service is closed
+     */
+    public <R> R find(String findStr, boolean strictMatch, Mapper<R> mapper) {
+        if (connection == null)
+            throw new IllegalStateException("Connection not set");
+
+        try {
+            Statement st = connection.createStatement();
             WinSearchResultSet rs = (WinSearchResultSet) st.executeQuery(sqlStatement.formatted(buildFindStr(findStr, strictMatch)));
-            System.out.println(rs.isClosed());
-            return mapper.apply(rs);
+            return mapper.apply(rs.stream(st));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -179,6 +204,7 @@ public class QueryExecutor {
         return new QueryExecutorBuilder(new QueryExecutor());
     }
 
+
     /**
      * Builder for {@link QueryExecutor}
      */
@@ -189,7 +215,7 @@ public class QueryExecutor {
             this.executor = executor;
         }
 
-        public QueryExecutorBuilder properties(Property... properties) {
+        public QueryExecutorBuilder properties(WinProperty... properties) {
             executor.addProperties(Arrays.stream(properties).toList());
             return this;
         }
@@ -214,10 +240,6 @@ public class QueryExecutor {
             return this;
         }
 
-        public QueryExecutorBuilder mapper(Function<WinSearchResultSet, Stream<?>> resultSetMapper) {
-            executor.setMapper(resultSetMapper);
-            return this;
-        }
 
         public QueryExecutorBuilder connection(WinSearchConnection connection) {
             executor.setConnection(connection);
@@ -228,6 +250,15 @@ public class QueryExecutor {
             executor.buildQuery();
             return executor;
         }
+
+        /**
+         * Builds empty QueryExecutor object. All settings should be done manually
+         * @return {@link QueryExecutor} object
+         */
+        public QueryExecutor buildEmpty() {
+            return new QueryExecutor();
+        }
+
     }
 
 

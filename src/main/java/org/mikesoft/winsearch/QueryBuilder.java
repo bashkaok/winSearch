@@ -1,5 +1,7 @@
 package org.mikesoft.winsearch;
 
+import org.mikesoft.winsearch.properties.WinProperty;
+
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -75,22 +77,22 @@ public class QueryBuilder {
     /**
      * Overloaded method {@link #build(List, Set, FullTextPredicate, Set)}
      *
-     * @param properties        List of {@link Property}
+     * @param properties        List of {@link org.mikesoft.winsearch.properties.WinProperty WinProperty}
      * @param folders           where will be done the searching, Set of {@link Folder Folder}
      * @param fullTextPredicate {@link FullTextPredicate#FreeText FREETEXT} or {@link FullTextPredicate#Contains CONTAINS} searching {@link FullTextPredicate FullTextPredicate}
-     * @param fullTextColumns   Optional. List of {@link Property} columns. Duplicate columns are ignored
+     * @param fullTextColumns   Optional. List of {@link org.mikesoft.winsearch.properties.WinProperty WinProperty} columns. Duplicate columns are ignored
      * @return @return SQL formatted string: "SELECT ... WHERE ...'%s'"
      */
-    public static String build(List<Property> properties,
+    public static String build(List<WinProperty> properties,
                                Set<Folder> folders,
                                FullTextPredicate fullTextPredicate,
-                               Property... fullTextColumns) {
+                               WinProperty... fullTextColumns) {
 
-        return build(properties.stream().map(Property::getName).toList(),
+        return build(properties.stream().map(WinProperty::getName).toList(),
                 folders,
                 fullTextPredicate,
                 Arrays.stream(fullTextColumns)
-                        .map(Property::getName)
+                        .map(WinProperty::getName)
                         .collect(Collectors.toSet())
         );
     }
@@ -144,11 +146,16 @@ public class QueryBuilder {
 
     /**
      * Folder depth predicates control the scope of a search by specifying a path and whether to perform a deep or shallow traversal
-     *
-     * @see <a href="https://learn.microsoft.com/en-us/windows/win32/search/-search-sql-folderdepth">SCOPE and DIRECTORY Predicates</a>
+     * <a href="https://learn.microsoft.com/en-us/windows/win32/search/-search-sql-folderdepth">MS Learn</a>
      */
     public enum TraversalPredicate {
+        /**
+         * Predicate performs a shallow traversal of only the folder specified
+         */
         Shallow("DIRECTORY"),
+        /**
+         * Predicate performs a deep traversal of the path, including all subfolders
+         */
         Deep("SCOPE");
         private final String predicate;
 
@@ -163,13 +170,17 @@ public class QueryBuilder {
 
     /**
      * The Microsoft Windows Search query full-text search predicates
-     * <p>
-     * The CONTAINS predicate performs comparisons on columns that contain text. The CONTAINS clause can perform matching on single words or phrases, based on the proximity of the search terms. In comparison, the FREETEXT predicate is tuned to match the meaning of the search phrases against text columns
-     *
-     * @see <a href="https://learn.microsoft.com/en-us/windows/win32/search/-search-sql-fulltextpredicates">Full-Text Predicates</a>
+     * <a href="https://learn.microsoft.com/en-us/windows/win32/search/-search-sql-fulltextpredicates">MS Learn</a>
      */
     public enum FullTextPredicate {
+        /**
+         * The predicate performs comparisons on columns that contain text
+         * <p>The CONTAINS clause can perform matching on single words or phrases, based on the proximity of the search terms
+         */
         Contains("CONTAINS"),
+        /**
+         * The predicate is tuned to match the meaning of the search phrases against text columns
+         */
         FreeText("FREETEXT");
         private final String predicate;
 

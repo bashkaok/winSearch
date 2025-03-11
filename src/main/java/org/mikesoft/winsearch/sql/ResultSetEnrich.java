@@ -1,10 +1,12 @@
 package org.mikesoft.winsearch.sql;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+/**
+ * Interface extends {@link java.sql.ResultSet}
+ */
 public interface ResultSetEnrich {
     /**
      * Returns {@link Optional} value of column with index.
@@ -35,5 +37,5 @@ public interface ResultSetEnrich {
      *
      * @return {@link Stream Stream&lt;WinSearchResultSet&gt;} | empty {@link Stream} if an exception was thrown
      */
-    Stream<ResultSet> stream();
+    Stream<WinSearchResultSet> stream();
 }
