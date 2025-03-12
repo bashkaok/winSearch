@@ -15,6 +15,7 @@ public class WinSearchStatement implements Statement {
     private final WinSearchConnection connection;
     private WinSearchResultSet resultSet;
     private boolean closed = false;
+    private String query;
 
     public WinSearchStatement(WinSearchConnection connection) {
         this.connection = connection;
@@ -22,7 +23,8 @@ public class WinSearchStatement implements Statement {
 
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {
-        ADORecordset rs = COMFactory.newRecordSet();
+        ADORecordset rs = COMFactory.newADORecordSet();
+        this.query = sql;
         try {
             rs.open(sql, connection.getAdoConnection(),
                     CursorTypeEnum.adOpenStatic,
@@ -292,4 +294,13 @@ public class WinSearchStatement implements Statement {
         if (isClosed()) throw new WinSearchSQLException("Statement is closed");
     }
 
+    @Override
+    public String toString() {
+        return "WinSearchStatement{" +
+                "connection=" + connection +
+                ", resultSet=" + resultSet +
+                ", closed=" + closed +
+                ", query='\n" + query + '\'' +
+                '}';
+    }
 }

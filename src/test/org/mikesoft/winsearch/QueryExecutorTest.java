@@ -1,5 +1,6 @@
 package org.mikesoft.winsearch;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mikesoft.winsearch.properties.Core;
 import org.mikesoft.winsearch.sql.WinSearchConnection;
@@ -9,14 +10,20 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mikesoft.winsearch.QueryBuilder.FullTextPredicate.Contains;
-import static org.mikesoft.winsearch.QueryBuilder.TraversalPredicate.Deep;
-import static org.mikesoft.winsearch.QueryBuilder.TraversalPredicate.Shallow;
+import static org.mikesoft.winsearch.QueryBuilder.ComparisonPredicate.Contains;
+import static org.mikesoft.winsearch.QueryBuilder.DepthPredicate.Deep;
+import static org.mikesoft.winsearch.QueryBuilder.DepthPredicate.Shallow;
 import static org.mikesoft.winsearch.QueryBuilder.Folder;
 
 class QueryExecutorTest {
+    public static final Logger log = Logger.getLogger(QueryExecutorTest.class.getName());
+
+    @BeforeAll
+    static void setUp() {
+    }
 
     @Test
     void builder() {
@@ -54,8 +61,12 @@ class QueryExecutorTest {
                 .fullTextPredicate(Contains)
                 .connection(con)
                 .build();
-        assertEquals(0, executor.find("bla-bla", true).count());
-        assertEquals(1, executor.find("standby", false).count());
+
+        //space in find string with CONTAINS
+        QueryExecutor finalExecutor = executor;
+        assertThrowsExactly(IllegalArgumentException.class, ()-> finalExecutor.find("bla bla"));
+        assertEquals(0, executor.find("bla-bla").count());
+        assertEquals(1, executor.find("standby").count());
 
         //custom mapper
         QueryExecutor.Mapper<List<Path>> mapper = resultSet -> resultSet
@@ -72,10 +83,11 @@ class QueryExecutorTest {
                 .connection(con)
                 .build();
 
-        assertEquals(0, executor.find("bla-bla", true, mapper).size());
-        assertEquals(1, executor.find("standby", false, mapper).size());
-        assertInstanceOf(List.class, executor.find("standby", false, mapper));
-        assertInstanceOf(Path.class, executor.find("standby", false, mapper).getFirst());
+
+        assertEquals(0, executor.find("bla-bla", mapper).size());
+        assertEquals(1, executor.find("standby", mapper).size());
+        assertInstanceOf(List.class, executor.find("standby", mapper));
+        assertInstanceOf(Path.class, executor.find("standby", mapper).getFirst());
 
         //manually build
         executor = QueryExecutor.builder().buildEmpty();
@@ -86,7 +98,7 @@ class QueryExecutorTest {
                 """;
         executor.setSqlStatement(SQL);
         executor.setConnection(con);
-        assertEquals(1, executor.find("standby", false, mapper).size());
+        assertEquals(1, executor.find("standby", mapper).size());
     }
 
 }

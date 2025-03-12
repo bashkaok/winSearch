@@ -116,9 +116,10 @@ interface _Recordset {
     OaIdl.SAFEARRAY getRows(int rows) throws COMInvokeException;
 
     /**
-     * <p>
-     * memberId(1016)</p>
+     * Gets all records from recordset
+     * @return two-dimensional array {@link OaIdl.SAFEARRAY SAFEARRAY}
      */
+    //memberId(1016)</p>
     @ComMethod(name = "GetRows")
     OaIdl.SAFEARRAY getRows();
 

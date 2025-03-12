@@ -1130,7 +1130,12 @@ public class WinSearchResultSet implements ResultSet, ResultSetEnrich {
     }
 
     @FunctionalInterface
-    public interface ThrowingSupplier<T, E extends Exception> {
+    interface ThrowingSupplier<T, E extends Exception> {
+        /**
+         * Implementation of {@link java.util.function.Supplier} that throws exception
+         * @return supplier result
+         * @throws E supplier exception
+         */
         T get() throws E;
     }
 
@@ -1151,7 +1156,11 @@ public class WinSearchResultSet implements ResultSet, ResultSetEnrich {
     }
 
     @FunctionalInterface
-    public interface ThrowingSupplierVoid<E extends Exception> {
+    interface ThrowingSupplierVoid<E extends Exception> {
+        /**
+         * Implementation of {@link java.util.function.Supplier} that throws exception
+         * @throws E supplier exception
+         */
         void get() throws E;
     }
 

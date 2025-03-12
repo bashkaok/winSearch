@@ -22,9 +22,10 @@ public class WinSearchDataSource implements DataSource {
 
     /**
      * Creates and opens native COM ADO connection with Search.CollatorDSO provider {@link #CONNECTION_STR}
+     * @return opened {@link ADOConnection} object
      */
     public static ADOConnection newADOConnection() {
-        ADOConnection adoConnection = COMFactory.newNativeConnection();
+        ADOConnection adoConnection = COMFactory.newADOConnection();
         adoConnection.open(CONNECTION_STR, "", "", -1);
         return adoConnection;
     }

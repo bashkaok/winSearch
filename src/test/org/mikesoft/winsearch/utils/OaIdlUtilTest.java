@@ -22,7 +22,7 @@ class OaIdlUtilTest {
                 WHERE DIRECTORY='file:D:/Tools/Java/winSearch/src/test/resources/test-data' AND CONTAINS(*,'standby.png')
                 """;
         ADOConnection con = WinSearchDataSource.newADOConnection();
-        ADORecordset rs = COMFactory.newRecordSet();
+        ADORecordset rs = COMFactory.newADORecordSet();
         rs.open(sql, con, CursorTypeEnum.adOpenStatic, LockTypeEnum.adLockReadOnly, adCmdUnspecified);
         return rs;
     }

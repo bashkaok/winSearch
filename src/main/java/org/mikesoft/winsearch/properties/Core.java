@@ -19,9 +19,18 @@ public enum Core implements WinProperty{
      */
     SystemFileExtension("System.FileExtension"),
     /**
+     * <a href="https://learn.microsoft.com/en-us/windows/win32/properties/props-system-isread">System.IsRead</a> Identifies whether the item has been read
+     */
+    SystemIsRead("System.IsRead"),
+    /**
      * <a href="https://learn.microsoft.com/en-us/windows/win32/properties/props-system-filename">System.FileName</a> The file name, including its extension.
      */
     SystemFileName("System.FileName"),
+    /**
+     * <a href="https://learn.microsoft.com/en-us/windows/win32/properties/props-system-foldernamedisplay">System.FolderNameDisplay</a> This property is similar to {@link #SystemItemNameDisplay System.ItemNameDisplay} except it is only set for folders, for files it will be empty.
+     * This is useful to segregate files and folders by using this as the first sort key
+     */
+    SystemFolderNameDisplay("System.FolderNameDisplay"),
     /**
      * <a href="https://learn.microsoft.com/en-us/windows/win32/properties/props-system-itemauthors">System.ItemAuthors</a> Generic list of authors associated with an item. For example, the artist name for a music track is the item author
      */
@@ -43,6 +52,10 @@ public enum Core implements WinProperty{
      */
     SystemItemName("System.ItemName"),
     /**
+     * <a href="https://learn.microsoft.com/en-us/windows/win32/properties/props-system-itemnamedisplay">System.ItemNameDisplay</a> The display name in "most complete" form. It is the unique representation of the item name most appropriate for end users
+     */
+    SystemItemNameDisplay("System.ItemNameDisplay"),
+    /**
      * <a href="https://learn.microsoft.com/en-us/windows/win32/properties/props-system-itempathdisplay">System.ItemPathDisplay</a> The user-friendly display path to the item
      */
     SystemItemPathDisplay("System.ItemPathDisplay"),
@@ -50,25 +63,14 @@ public enum Core implements WinProperty{
      * <a href="https://learn.microsoft.com/en-us/windows/win32/properties/props-system-itemurl">System.ItemUrl</a> Represents a well-formed URL that points to the item
      */
     SystemItemUrl("System.ItemUrl"),
-    SystemDueDate("System.DueDate"),
     SystemIsAttachment("System.IsAttachment"),
     SystemIsDeleted("System.IsDeleted"),
-    SystemItemNamePrefix("System.ItemNamePrefix"),
     SystemItemTypeText("System.ItemTypeText"),
-    SystemItemParticipants("System.ItemParticipants"),
     SystemKind("System.Kind"),
     SystemKindText("System.KindText"),
-    SystemIsIncomplete("System.IsIncomplete"),
-    SystemIsFlaggedComplete("System.IsFlaggedComplete"),
-    SystemIsFlagged("System.IsFlagged"),
     SystemFlagStatusText("System.FlagStatusText"),
-    SystemIdentity("System.Identity"),
-    SystemIsRead("System.IsRead"),
-    SystemImportance("System.Importance"),
     SystemSearchContainerHash("System.Search.ContainerHash"),
     SystemSearchStore("System.Search.Store"),
-    SystemEndDate("System.EndDate"),
-    SystemStartDate("System.StartDate"),
     SystemKeywords("System.Keywords");
 
     private final String name;

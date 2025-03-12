@@ -10,8 +10,8 @@ import static org.mikesoft.winsearch.ado.ObjectStateEnum.adStateOpen;
 class COMFactoryTest {
 
     @Test
-    void newNativeConnection() {
-        ADOConnection con = COMFactory.newNativeConnection();
+    void newADOConnection() {
+        ADOConnection con = COMFactory.newADOConnection();
         assertNotNull(con);
         assertEquals("MSDASQL", con.getProvider());
         assertEquals(adStateClosed.getValue(), con.state());
@@ -28,8 +28,8 @@ class COMFactoryTest {
     }
 
     @Test
-    void newRecordSet() {
-        ADORecordset rs = COMFactory.newRecordSet();
+    void newADORecordSet() {
+        ADORecordset rs = COMFactory.newADORecordSet();
         assertNotNull(rs);
         assertEquals(adStateClosed.getValue(), rs.state());
     }

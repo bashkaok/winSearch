@@ -11,7 +11,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.mikesoft.winsearch.QueryBuilder.FullTextPredicate.FreeText;
+import static org.mikesoft.winsearch.QueryBuilder.ComparisonPredicate.Contains;
+import static org.mikesoft.winsearch.QueryBuilder.ComparisonPredicate.FreeText;
 
 /**
  * Service for requests to MS Windows Index Search<br>
@@ -45,8 +46,9 @@ public class QueryExecutor {
     private String sqlStatement;
     private final List<String> propertyNames = new ArrayList<>();
     private final Set<QueryBuilder.Folder> folders = new HashSet<>();
-    private QueryBuilder.FullTextPredicate fullTextPredicate = FreeText;
+    private QueryBuilder.ComparisonPredicate fullTextPredicate = FreeText;
     private final Set<String> fulltextColumns = new HashSet<>();
+    private String resultStatement;
 
     private QueryExecutor() {
     }
@@ -86,15 +88,15 @@ public class QueryExecutor {
     }
 
     /**
-     * Sets {@link QueryBuilder.FullTextPredicate FullText} predicate
+     * Sets {@link QueryBuilder.ComparisonPredicate FullText} predicate
      *
-     * @param fullTextPredicate default {@link QueryBuilder.FullTextPredicate#FreeText FreeText}
+     * @param fullTextPredicate default {@link QueryBuilder.ComparisonPredicate#FreeText FreeText}
      */
-    public void setFullTextPredicate(QueryBuilder.FullTextPredicate fullTextPredicate) {
+    public void setFullTextPredicate(QueryBuilder.ComparisonPredicate fullTextPredicate) {
         this.fullTextPredicate = fullTextPredicate;
     }
 
-    public QueryBuilder.FullTextPredicate getFullTextPredicate() {
+    public QueryBuilder.ComparisonPredicate getFullTextPredicate() {
         return fullTextPredicate;
     }
 
@@ -130,6 +132,15 @@ public class QueryExecutor {
     }
 
     /**
+     * Gets state of {@link org.mikesoft.winsearch.sql.WinSearchStatement WinSearchStatement} after query execution
+     *
+     * @return string with state of statement, query and number of retrieved records
+     */
+    public String getResultStatement() {
+        return resultStatement;
+    }
+
+    /**
      * Builds query on this class field values
      */
     public void buildQuery() {
@@ -141,15 +152,14 @@ public class QueryExecutor {
     }
 
     /**
-     * Finds the specified String with match condition
+     * Finds the specified String with match condition. Overloaded method {@link #find(String, Mapper) find()}
      *
      * @param findStr     String to find
-     * @param strictMatch true - strict match
      * @throws IllegalStateException when the service is closed
      */
 
-    public Stream<WinSearchResultSet> find(String findStr, boolean strictMatch) {
-        return find(findStr, strictMatch, DEFAULT_MAPPER);
+    public Stream<WinSearchResultSet> find(String findStr) {
+        return find(findStr, DEFAULT_MAPPER);
     }
 
     /**
@@ -166,33 +176,29 @@ public class QueryExecutor {
      * Finds the specified String with match condition
      *
      * @param findStr     String to find
-     * @param strictMatch true - strict match
      * @param mapper      {@link Mapper Mapper&lt;R>}.
      * @param <R>         type of mapper result
      * @return mapper result
      * @throws IllegalStateException when the service is closed
      */
-    public <R> R find(String findStr, boolean strictMatch, Mapper<R> mapper) {
+    public <R> R find(String findStr, Mapper<R> mapper) {
         if (connection == null)
             throw new IllegalStateException("Connection not set");
+        assertFindString(findStr);
 
         try {
             Statement st = connection.createStatement();
-            WinSearchResultSet rs = (WinSearchResultSet) st.executeQuery(sqlStatement.formatted(buildFindStr(findStr, strictMatch)));
+            WinSearchResultSet rs = (WinSearchResultSet) st.executeQuery(sqlStatement.formatted(findStr));
+            resultStatement = st + "\nRecords retrieved: " + rs.size();
             return mapper.apply(rs.stream(st));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private String buildFindStr(String findStr, boolean strictMatch) {
-        if (strictMatch) return prepareFindStr(findStr).replaceAll(" ", "*");
-        else return prepareFindStr(findStr);
-    }
-
-    private static String prepareFindStr(String findStr) {
-        return findStr.replaceAll("'", "''")
-                .replaceAll("[\\n.!,)(]", "_");
+    private void assertFindString(String findStr) {
+        if (fullTextPredicate == Contains && findStr.contains(" ") && !FindStringBuilder.isQuotationEnclosed(findStr))
+            throw new IllegalArgumentException("Find string contains the <space> symbols. For use with CONTAINS predicate the string should be enclosed in quotation marks");
     }
 
     /**
@@ -211,7 +217,7 @@ public class QueryExecutor {
     public static class QueryExecutorBuilder {
         private final QueryExecutor executor;
 
-        public QueryExecutorBuilder(QueryExecutor executor) {
+        private QueryExecutorBuilder(QueryExecutor executor) {
             this.executor = executor;
         }
 
@@ -230,7 +236,7 @@ public class QueryExecutor {
             return this;
         }
 
-        public QueryExecutorBuilder fullTextPredicate(QueryBuilder.FullTextPredicate fullTextPredicate) {
+        public QueryExecutorBuilder fullTextPredicate(QueryBuilder.ComparisonPredicate fullTextPredicate) {
             executor.setFullTextPredicate(fullTextPredicate);
             return this;
         }
@@ -253,6 +259,7 @@ public class QueryExecutor {
 
         /**
          * Builds empty QueryExecutor object. All settings should be done manually
+         *
          * @return {@link QueryExecutor} object
          */
         public QueryExecutor buildEmpty() {

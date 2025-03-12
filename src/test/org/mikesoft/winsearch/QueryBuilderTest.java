@@ -18,15 +18,15 @@ class QueryBuilderTest {
         //Empty property list
         assertThrowsExactly(IllegalArgumentException.class, () -> QueryBuilder.build(
                 new ArrayList<String>(),
-                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.TraversalPredicate.Shallow)),
-                QueryBuilder.FullTextPredicate.FreeText)
+                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.DepthPredicate.Shallow)),
+                QueryBuilder.ComparisonPredicate.FreeText)
         );
 
         //Full-text columns not in property list
         assertThrowsExactly(IllegalArgumentException.class, () -> QueryBuilder.build(
                         List.of("System.ItemPathDisplay", "System.FileName"),
-                        Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.TraversalPredicate.Shallow)),
-                        QueryBuilder.FullTextPredicate.FreeText,
+                        Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.DepthPredicate.Shallow)),
+                        QueryBuilder.ComparisonPredicate.FreeText,
                         "System.FileDisplayName"
                 )
         );
@@ -41,8 +41,8 @@ class QueryBuilderTest {
                 """;
         assertEquals(shallow_freeText_Sql.trim(), QueryBuilder.build(
                 List.of(Core.SystemItemPathDisplay, Core.SystemFileName),
-                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.TraversalPredicate.Shallow)),
-                QueryBuilder.FullTextPredicate.FreeText
+                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.DepthPredicate.Shallow)),
+                QueryBuilder.ComparisonPredicate.FreeText
         ).trim());
 
         final String deep_contains_Sql = """
@@ -52,10 +52,21 @@ class QueryBuilderTest {
                 """;
         assertEquals(deep_contains_Sql.trim(), QueryBuilder.build(
                 List.of(Core.SystemItemPathDisplay, Core.SystemFileName),
-                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.TraversalPredicate.Deep)),
-                QueryBuilder.FullTextPredicate.Contains
+                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.DepthPredicate.Deep)),
+                QueryBuilder.ComparisonPredicate.Contains
         ).trim());
 
+        final String comparison_Sql = """
+                SELECT System.ItemPathDisplay, System.FileName
+                FROM SystemIndex
+                WHERE (DIRECTORY='file:D:\\Tools\\test-test_path') AND System.FileName='%s'
+                """;
+        assertEquals(comparison_Sql.trim(), QueryBuilder.build(
+                List.of(Core.SystemItemPathDisplay, Core.SystemFileName),
+                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.DepthPredicate.Shallow)),
+                QueryBuilder.ComparisonPredicate.EqualTo,
+                Core.SystemFileName
+        ).trim());
     }
 
     @Test
@@ -67,9 +78,9 @@ class QueryBuilderTest {
                 """;
         assertEquals(sql.trim(), QueryBuilder.build(
                 List.of(Core.SystemItemPathDisplay, Core.SystemFileName),
-                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.TraversalPredicate.Deep),
-                        QueryBuilder.Folder.of(Path.of("D:\\Tools\\test-path2"), QueryBuilder.TraversalPredicate.Shallow)),
-                QueryBuilder.FullTextPredicate.Contains,
+                Set.of(QueryBuilder.Folder.of(test_path, QueryBuilder.DepthPredicate.Deep),
+                        QueryBuilder.Folder.of(Path.of("D:\\Tools\\test-path2"), QueryBuilder.DepthPredicate.Shallow)),
+                QueryBuilder.ComparisonPredicate.Contains,
                 Core.SystemItemPathDisplay, Core.SystemFileName
         ).trim());
     }
@@ -85,7 +96,7 @@ class QueryBuilderTest {
         assertEquals(sql.trim(), QueryBuilder.build(
                 List.of(Core.SystemItemPathDisplay, Core.SystemFileName),
                 Set.of(),
-                QueryBuilder.FullTextPredicate.Contains,
+                QueryBuilder.ComparisonPredicate.Contains,
                 Core.SystemItemPathDisplay, Core.SystemFileName
         ).trim());
 

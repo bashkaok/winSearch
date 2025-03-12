@@ -29,7 +29,7 @@ class ADORecordsetTest {
                 FROM SystemIndex
                 WHERE DIRECTORY='file:D:/Tools/Java/winSearch/src/test/resources/test-data' AND CONTAINS(*,'standby.png')
                 """;
-        ADORecordset rs = COMFactory.newRecordSet();
+        ADORecordset rs = COMFactory.newADORecordSet();
         rs.open(sql, con, adOpenStatic, adLockReadOnly, adCmdUnspecified);
         return rs;
     }
@@ -40,7 +40,7 @@ class ADORecordsetTest {
                 FROM SystemIndex
                 WHERE SCOPE='file:D:/Tools/Java/winSearch/src/test/resources/test-data'
                 """;
-        ADORecordset rs = COMFactory.newRecordSet();
+        ADORecordset rs = COMFactory.newADORecordSet();
         rs.open(sql, con, adOpenStatic, adLockReadOnly, adCmdUnspecified);
         return rs;
     }
@@ -118,21 +118,21 @@ class ADORecordsetTest {
     void movePrevious() {
         ADORecordset rs = getAnyRecordset();
         assertTrue(!rs.isBOF() && !rs.isEOF());
-        System.out.println("BOF=" + rs.isBOF() + " : EOF=" + rs.isEOF() + " : absolutePosition=" + rs.absolutePosition());
+//        System.out.println("BOF=" + rs.isBOF() + " : EOF=" + rs.isEOF() + " : absolutePosition=" + rs.absolutePosition());
         rs.movePrevious();
-        System.out.println("BOF=" + rs.isBOF() + " : EOF=" + rs.isEOF() + " : absolutePosition=" + rs.absolutePosition());
+//        System.out.println("BOF=" + rs.isBOF() + " : EOF=" + rs.isEOF() + " : absolutePosition=" + rs.absolutePosition());
         assertTrue(rs.isBOF());
         rs.moveNext();
         rs.moveNext();
         rs.moveNext();
-        System.out.println("BOF=" + rs.isBOF() + " : EOF=" + rs.isEOF() + " : absolutePosition=" + rs.absolutePosition());
+//        System.out.println("BOF=" + rs.isBOF() + " : EOF=" + rs.isEOF() + " : absolutePosition=" + rs.absolutePosition());
     }
 
 
     @Test
     void incorrectSQL() {
         final String sql = "SELECT System.ItemName FROM SystemIndex WHERE SCOPE='file:E:/downloads'";
-        ADORecordset rs = COMFactory.newRecordSet();
+        ADORecordset rs = COMFactory.newADORecordSet();
         rs.open(sql, con, adOpenStatic, adLockReadOnly, adCmdUnspecified);
         assertTrue(rs.isEOF() && rs.isBOF());
 
@@ -142,8 +142,6 @@ class ADORecordsetTest {
     void oneRecordRecordSet() {
         ADORecordset rs = getOneRecordset();
         assertEquals(adOpenStatic, CursorTypeEnum.valueOf(rs.cursorType()));
-        System.out.println(rs.lockType());
-        System.out.println(rs.getRecordCount());
         rs.move(-1);
         assertTrue(rs.isBOF());
         int count = 0;
@@ -156,7 +154,6 @@ class ADORecordsetTest {
 
         rs.moveFirst();
         Object[][] record = (Object[][]) OaIdlUtil.toPrimitiveArray(rs.getRows(1), true);
-        System.out.println((String) record[0][0]);
     }
 
     @Test

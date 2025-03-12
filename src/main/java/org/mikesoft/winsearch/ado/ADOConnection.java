@@ -81,7 +81,7 @@ interface _Connection {
     ADORecordset execute(String sql, long count);
 
     /**
-     * Overloaded {@link #execute(String, long)}
+     * Overloaded execute(String, long)
      *
      * @param sql SQL statement
      * @return @return {@link ADORecordset}
