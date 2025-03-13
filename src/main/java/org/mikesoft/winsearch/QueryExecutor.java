@@ -136,6 +136,7 @@ public class QueryExecutor {
      *
      * @return string with state of statement, query and number of retrieved records
      */
+    @SuppressWarnings("unused")
     public String getResultStatement() {
         return resultStatement;
     }
@@ -226,6 +227,11 @@ public class QueryExecutor {
             return this;
         }
 
+        /**
+         * Adds select columns to object
+         * @param properties String name of columns
+         * @return {@link QueryExecutorBuilder} object
+         */
         public QueryExecutorBuilder properties(String... properties) {
             executor.addPropertyNames(Arrays.stream(properties).toList());
             return this;
@@ -236,13 +242,29 @@ public class QueryExecutor {
             return this;
         }
 
-        public QueryExecutorBuilder fullTextPredicate(QueryBuilder.ComparisonPredicate fullTextPredicate) {
+        public QueryExecutorBuilder comparisonPredicate(QueryBuilder.ComparisonPredicate fullTextPredicate) {
             executor.setFullTextPredicate(fullTextPredicate);
             return this;
         }
 
-        public QueryExecutorBuilder fullTextColumns(String... columns) {
+        /**
+         * Adds constraint columns to object
+         * @param columns String names columns from properties set {@link #properties(String...)}
+         * @return {@link QueryExecutorBuilder} object
+         */
+        public QueryExecutorBuilder constraintColumns(String... columns) {
             executor.addFullTextColumns(Arrays.stream(columns).collect(Collectors.toSet()));
+            return this;
+        }
+
+        /**
+         * Adds constraint columns to object
+         * @param columns {@link WinProperty} columns from properties set {@link #properties(WinProperty...)}
+         * @return {@link QueryExecutorBuilder} object
+         */
+        @SuppressWarnings("unused")
+        public QueryExecutorBuilder constraintColumns(WinProperty... columns) {
+            executor.addFullTextColumns(Arrays.stream(columns).map(WinProperty::getName).collect(Collectors.toSet()));
             return this;
         }
 
@@ -252,6 +274,10 @@ public class QueryExecutor {
             return this;
         }
 
+        /**
+         * Final method for build. Calls {@link QueryExecutor#buildQuery()}
+         * @return ready {@link QueryExecutor} object
+         */
         public QueryExecutor build() {
             executor.buildQuery();
             return executor;

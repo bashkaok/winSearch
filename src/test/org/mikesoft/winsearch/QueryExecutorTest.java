@@ -10,7 +10,6 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mikesoft.winsearch.QueryBuilder.ComparisonPredicate.Contains;
@@ -19,7 +18,7 @@ import static org.mikesoft.winsearch.QueryBuilder.DepthPredicate.Shallow;
 import static org.mikesoft.winsearch.QueryBuilder.Folder;
 
 class QueryExecutorTest {
-    public static final Logger log = Logger.getLogger(QueryExecutorTest.class.getName());
+//    public static final Logger log = Logger.getLogger(QueryExecutorTest.class.getName());
 
     @BeforeAll
     static void setUp() {
@@ -34,8 +33,8 @@ class QueryExecutorTest {
                         Folder.of(Path.of("Folder2"), Deep),
                         Folder.of(Path.of("Folder1"), Deep)
                 )
-                .fullTextPredicate(Contains)
-                .fullTextColumns("System.FileName")
+                .comparisonPredicate(Contains)
+                .constraintColumns("System.FileName")
                 .connection(null)
                 .build();
 
@@ -58,7 +57,7 @@ class QueryExecutorTest {
         QueryExecutor executor = QueryExecutor.builder()
                 .properties(Core.SystemFileName, Core.SystemItemPathDisplay)
                 .folders(Folder.of(dataPath,Shallow))
-                .fullTextPredicate(Contains)
+                .comparisonPredicate(Contains)
                 .connection(con)
                 .build();
 
@@ -79,7 +78,7 @@ class QueryExecutorTest {
         executor = QueryExecutor.builder()
                 .properties(Core.SystemFileName, Core.SystemItemPathDisplay)
                 .folders(Folder.of(dataPath, Shallow))
-                .fullTextPredicate(Contains)
+                .comparisonPredicate(Contains)
                 .connection(con)
                 .build();
 

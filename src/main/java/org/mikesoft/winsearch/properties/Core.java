@@ -56,6 +56,10 @@ public enum Core implements WinProperty{
      */
     SystemItemNameDisplay("System.ItemNameDisplay"),
     /**
+     * <a href="https://learn.microsoft.com/en-us/windows/win32/properties/props-system-itemnamedisplaywithoutextension">System.ItemNameDisplayWithoutExtension</a> This is similar to {@link #SystemItemNameDisplay System.ItemNameDisplay} except that it never includes a file extension
+     */
+    SystemItemNameDisplayWithoutExtension("System.ItemNameDisplayWithoutExtension"),
+    /**
      * <a href="https://learn.microsoft.com/en-us/windows/win32/properties/props-system-itempathdisplay">System.ItemPathDisplay</a> The user-friendly display path to the item
      */
     SystemItemPathDisplay("System.ItemPathDisplay"),
