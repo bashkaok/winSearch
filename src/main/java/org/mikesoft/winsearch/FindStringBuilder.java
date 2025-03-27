@@ -42,6 +42,19 @@ public class FindStringBuilder {
     }
 
     /**
+     * Builder for a find string
+     * <ul>
+     * <li>replaces special symbols: ' by ''</li>
+     * </ul>
+     * Params:
+     * @param findStr initial string
+     * @return result string
+     */
+    public static String build(String findStr) {
+        return findStr.replaceAll("'", "''");
+    }
+
+    /**
      * Check the string for quotations marks
      * @param str string
      * @return true if string is enclosed in quotation marks
