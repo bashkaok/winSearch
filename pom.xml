@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.mikesoft</groupId>
+    <groupId>com.jisj</groupId>
     <artifactId>winsearch</artifactId>
     <version>1.2.2</version>
     <name>winSearch</name>
@@ -50,7 +50,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>org.mikesoft.winsearch</mainClass>
+                            <mainClass>com.jisj.winsearch</mainClass>
                             <addDefaultImplementationEntries>
                                 true
                             </addDefaultImplementationEntries>
